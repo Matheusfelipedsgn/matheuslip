@@ -1,0 +1,159 @@
+---
+import Symbol from '../assets/logo/volt-symbol.svg';
+---
+
+<section id="top" class="hero" aria-labelledby="hero-title" data-track="hero">
+  <div class="stage" data-stage>
+    <Symbol class="fallback" aria-hidden="true" />
+
+    <div class="content" data-first>
+      <p class="name">Volt Estúdio Criativo</p>
+      <h1 id="hero-title">Sites que mostram o valor do seu negócio antes da primeira conversa.</h1>
+      <p class="lead">
+        Criamos landing pages e sites institucionais para empresas, startups e pequenos comércios,
+        do B2B ao B2C.
+      </p>
+      <div class="actions">
+        <a class="button" href="#contato">Vamos conversar</a>
+        <a class="text-link" href="#projetos">Conheça nosso trabalho</a>
+      </div>
+    </div>
+
+    <p class="second" data-second>Design que transforma ideias em experiências digitais.</p>
+  </div>
+</section>
+
+<style>
+  :global(.has-3d) .hero {
+    height: 240svh;
+  }
+
+  .stage {
+    position: relative;
+    overflow: clip;
+    height: 100svh;
+    min-height: 38rem;
+  }
+
+  :global(.has-3d) .stage {
+    position: sticky;
+    top: 0;
+  }
+
+  /* Símbolo plano enquanto o 3D carrega, e definitivo sem WebGL ou com movimento reduzido. */
+  .fallback {
+    position: absolute;
+    top: 50%;
+    left: 75%;
+    width: min(40vw, 62vh);
+    height: auto;
+    color: var(--accent);
+    transform: translate(-50%, -50%);
+  }
+
+  :global(.is-ready) .fallback {
+    display: none;
+  }
+
+  .content {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 54%;
+    padding-left: var(--edge);
+    translate: 0 -50%;
+  }
+
+  .name {
+    margin-bottom: 1.25rem;
+    color: var(--muted-on-ink);
+    font-weight: 500;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 4.7vw, 5.25rem);
+  }
+
+  .lead {
+    max-width: 34rem;
+    margin-top: 1.5rem;
+    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.75rem;
+    margin-top: 2.25rem;
+  }
+
+  .second {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    display: none;
+    visibility: hidden;
+    width: 50%;
+    padding-right: var(--edge);
+    font-size: clamp(2.25rem, 4.4vw, 4.75rem);
+    font-stretch: 118%;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    opacity: 0;
+    text-wrap: balance;
+    translate: 0 -50%;
+  }
+
+  :global(.has-3d) .second {
+    display: block;
+  }
+
+  /* Celular e tablet: a peça abre a tela e o texto fica na base. */
+  @media (max-width: 56.24rem) {
+    .fallback {
+      top: 25%;
+      left: 50%;
+      width: min(60vw, 30vh);
+    }
+
+    .content,
+    .second {
+      top: auto;
+      right: 0;
+      bottom: 1.5rem;
+      left: 0;
+      width: auto;
+      padding-inline: var(--gutter);
+      translate: none;
+    }
+
+    .name {
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      font-stretch: 92%;
+      line-height: 1.4;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 8vw, 3.75rem);
+    }
+
+    .lead {
+      margin-top: 0.75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .actions {
+      gap: 0.75rem 1.5rem;
+      margin-top: 1.125rem;
+    }
+
+    .second {
+      bottom: 4rem;
+      font-size: clamp(2rem, 9vw, 3.75rem);
+    }
+  }
+</style>

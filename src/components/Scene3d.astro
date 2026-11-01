@@ -1,0 +1,32 @@
+<canvas class="scene3d" aria-hidden="true" data-scene></canvas>
+
+<script>
+  const root = document.documentElement;
+
+  if (root.classList.contains('has-3d')) {
+    // O three.js só carrega depois da página: o texto e o CTA nunca esperam pelo 3D.
+    const load = () =>
+      import('../scripts/scene3d')
+        .then(({ startScene3d }) => startScene3d(document.querySelector<HTMLCanvasElement>('[data-scene]')!))
+        .catch(() => root.classList.remove('has-3d'));
+    if (document.readyState === 'complete') load();
+    else addEventListener('load', load, { once: true });
+  }
+</script>
+
+<style>
+  .scene3d {
+    position: fixed;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    display: none;
+    width: 100%;
+    height: 100lvh;
+    pointer-events: none;
+  }
+
+  :global(.is-ready) .scene3d {
+    display: block;
+  }
+</style>

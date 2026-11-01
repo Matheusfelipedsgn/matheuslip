@@ -1,0 +1,158 @@
+---
+import { steps } from '../data/site';
+---
+
+<section id="processo" class="process" aria-labelledby="processo-title" data-track="process">
+  <div class="stage" data-stage>
+    <div class="column">
+      <h2 id="processo-title">Como funciona um projeto</h2>
+
+      <ol class="steps">
+        {
+          steps.map((step, index) => (
+            <li class:list={['step', { 'is-active': index === 0 }]} data-item>
+              <span class="number" aria-hidden="true">{index + 1}</span>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stage {
+    padding: var(--section) var(--edge);
+  }
+
+  h2 {
+    font-size: clamp(2.125rem, 5.4vw, 4.75rem);
+  }
+
+  .steps {
+    margin-top: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: clamp(3rem, 6vw, 5.5rem) minmax(0, 1fr);
+    align-items: start;
+    padding-block: clamp(1.25rem, 2.2vw, 2rem);
+    border-top: 2px solid var(--line-on-ink);
+  }
+
+  .number {
+    font-size: clamp(2.25rem, 4vw, 3.75rem);
+    font-stretch: 118%;
+    font-weight: 700;
+    line-height: 0.95;
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 1.9vw, 1.75rem);
+    font-stretch: 112%;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  p {
+    max-width: 32rem;
+    margin-top: 0.375rem;
+    color: var(--muted-on-ink);
+  }
+
+  /* Com 3D: a cada etapa, as peças soltas chegam mais perto de formar o símbolo. */
+  :global(.has-3d) .process {
+    height: 300svh;
+  }
+
+  :global(.has-3d) .stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    overflow: clip;
+    flex-direction: column;
+    justify-content: center;
+    height: 100svh;
+    min-height: 38rem;
+    padding-block: calc(var(--header-h) + 1rem) 1.5rem;
+  }
+
+  :global(.has-3d) .column {
+    width: 50%;
+    margin-left: auto;
+  }
+
+  :global(.has-3d) h2 {
+    font-size: clamp(1.75rem, 3.4vw, 3.5rem);
+  }
+
+  :global(.has-3d) .step {
+    transition: border-color 0.3s linear;
+  }
+
+  :global(.has-3d) .number,
+  :global(.has-3d) h3,
+  :global(.has-3d) p {
+    color: var(--dim-on-ink);
+    transition: color 0.3s linear;
+  }
+
+  :global(.has-3d) .is-active {
+    border-color: var(--accent);
+  }
+
+  :global(.has-3d) .is-active .number {
+    color: var(--accent);
+  }
+
+  :global(.has-3d) .is-active h3 {
+    color: var(--paper);
+  }
+
+  :global(.has-3d) .is-active p {
+    color: var(--muted-on-ink);
+  }
+
+  @media (max-width: 56.24rem) {
+    :global(.has-3d) .stage {
+      justify-content: flex-end;
+      padding-inline: var(--gutter);
+    }
+
+    :global(.has-3d) .column {
+      width: auto;
+    }
+
+    :global(.has-3d) h2 {
+      font-size: clamp(1.5rem, 6.4vw, 2.75rem);
+    }
+
+    :global(.has-3d) .steps {
+      margin-top: 0.75rem;
+    }
+
+    :global(.has-3d) .step {
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+      padding-block: 0.5rem;
+    }
+
+    :global(.has-3d) .number {
+      font-size: 1.625rem;
+    }
+
+    :global(.has-3d) h3 {
+      font-size: 1.0625rem;
+    }
+
+    :global(.has-3d) p {
+      margin-top: 0.125rem;
+      font-size: 0.875rem;
+      line-height: 1.35;
+    }
+  }
+</style>

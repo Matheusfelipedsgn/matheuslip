@@ -1,0 +1,95 @@
+---
+import { contact, emailUrl, whatsappUrl } from '../data/site';
+---
+
+<section id="contato" class="cta" aria-labelledby="contato-title" data-light>
+  <div class="wrap content">
+    <h2 id="contato-title">Seu próximo projeto digital começa com uma boa ideia.</h2>
+    <div class="closing">
+      <p class="lead">Conte o que você precisa. A partir daí, vemos juntos o melhor caminho para o seu site.</p>
+      <div class="actions">
+        <a
+          class="button"
+          href={whatsappUrl ?? emailUrl}
+          {...whatsappUrl ? { target: '_blank', rel: 'noopener' } : {}}
+          data-final-cta
+        >
+          Solicitar orçamento
+        </a>
+        <a class="text-link" href={emailUrl}>{contact.email}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    --button-bg: var(--ink);
+    --button-fg: var(--paper);
+    --button-hover: var(--paper);
+    --button-hover-fg: var(--ink);
+    --cut: clamp(3rem, 8vw, 7rem);
+    padding-block: calc(var(--header-h) + clamp(2rem, 5vw, 4.5rem)) clamp(3.5rem, 8vw, 7rem);
+    background: var(--accent);
+    clip-path: polygon(calc(var(--cut) * var(--slant)) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
+    color: var(--on-accent);
+  }
+
+  /* O lime entra pela direita, na diagonal da marca, antes de ocupar a seção. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .cta {
+        animation: cta-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%;
+      }
+    }
+  }
+
+  @keyframes cta-in {
+    from {
+      clip-path: polygon(100% 0, 100% 0, 100% 100%, 62% 100%, 62% 100%);
+    }
+  }
+
+  h2 {
+    max-width: 17ch;
+    font-size: clamp(2.25rem, 7.4vw, 7.5rem);
+  }
+
+  .closing {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: end;
+    column-gap: clamp(1rem, 2vw, 2rem);
+    margin-top: clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .lead {
+    grid-column: 1 / span 5;
+    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  }
+
+  .actions {
+    grid-column: 7 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.75rem;
+  }
+
+  .text-link {
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 56.24rem) {
+    .lead,
+    .actions {
+      grid-column: 1 / -1;
+    }
+
+    .actions {
+      margin-top: 1.75rem;
+    }
+  }
+</style>

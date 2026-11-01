@@ -1,0 +1,90 @@
+---
+import { Image } from 'astro:assets';
+import photo from '../assets/photos/about.webp';
+---
+
+<section id="sobre" class="about" aria-labelledby="sobre-title">
+  <div class="wrap grid">
+    <figure class="figure wipe">
+      <Image
+        src={photo}
+        alt="Matheus Felipe de camiseta preta em seu espaço de trabalho, com luz verde lime ao fundo"
+        widths={[420, 640, 900, 1254]}
+        sizes="(min-width: 56.25rem) 36vw, 100vw"
+      />
+    </figure>
+
+    <div class="text">
+      <h2 id="sobre-title" class="reveal">Sou Matheus Felipe, criador da Volt.</h2>
+      <div class="body reveal">
+        <p>
+          Comecei no design ainda na adolescência, em Belo Horizonte. São mais de 8 anos criando
+          identidades visuais, peças para redes sociais, interfaces e landing pages, em segmentos
+          como estética, gastronomia e infoprodutos.
+        </p>
+        <p>
+          Passei por escritório de design e por times de marketing, como V4 Company, Turbo Academy e
+          Be Growth. Criei a Volt para levar essa experiência às empresas: acredito que um site
+          precisa ser mais do que bonito, precisa comunicar valor e facilitar o próximo passo de
+          quem visita.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* A altura mínima garante que o objeto 3D saia da tela antes de reaparecer em Serviços. */
+  .about {
+    display: grid;
+    align-content: center;
+    min-height: 100svh;
+    padding-block: var(--section);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: end;
+    column-gap: clamp(1rem, 2vw, 2rem);
+    width: 100%;
+  }
+
+  .figure {
+    grid-column: 1 / span 5;
+  }
+
+  .figure :global(img) {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+
+  .text {
+    grid-column: 7 / -1;
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem clamp(1.5rem, 3vw, 3rem);
+    margin-top: clamp(2rem, 5vw, 4.5rem);
+    color: var(--muted-on-ink);
+  }
+
+  @media (max-width: 56.24rem) {
+    .figure {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      margin-top: 2.5rem;
+    }
+
+    .text {
+      grid-column: 1 / -1;
+    }
+
+    .body {
+      grid-template-columns: minmax(0, 1fr);
+      margin-top: 1.5rem;
+    }
+  }
+</style>

@@ -1,0 +1,169 @@
+---
+import { services } from '../data/site';
+---
+
+<section id="servicos" class="services" aria-labelledby="servicos-title" data-track="services">
+  <div class="stage" data-stage>
+    <div class="column">
+      <h2 id="servicos-title">O que a Volt faz</h2>
+
+      <ul class="list">
+        {
+          services.map((service, index) => (
+            <li class:list={['item', { 'is-active': index === 0 }]} data-item>
+              <h3>{service.name}</h3>
+              <div class="panel">
+                <p class="description">{service.description}</p>
+                <ul class="benefits">
+                  {service.benefits.map((benefit) => <li>{benefit}</li>)}
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Sem 3D: lista corrida, com todo o conteúdo visível. */
+  .stage {
+    padding: var(--section) var(--edge);
+  }
+
+  h2 {
+    font-size: clamp(2.125rem, 5.4vw, 4.75rem);
+  }
+
+  .list {
+    margin-top: clamp(2rem, 5vw, 4rem);
+  }
+
+  .item {
+    padding-block: clamp(1.5rem, 3vw, 2.5rem);
+    border-top: 2px solid var(--line-on-ink);
+  }
+
+  h3 {
+    font-size: clamp(1.75rem, 3.6vw, 3.75rem);
+    font-stretch: 118%;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    line-height: 1.06;
+  }
+
+  .description {
+    max-width: 38rem;
+    margin-top: 1rem;
+  }
+
+  .benefits {
+    display: grid;
+    gap: 0.375rem;
+    margin-top: 1rem;
+    color: var(--muted-on-ink);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+
+  /* Com 3D: a tela fica fixa, o nome ativo acende junto com a peça do símbolo. */
+  :global(.has-3d) .services {
+    height: 300svh;
+  }
+
+  :global(.has-3d) .stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    overflow: clip;
+    flex-direction: column;
+    justify-content: center;
+    height: 100svh;
+    min-height: 38rem;
+    padding-block: calc(var(--header-h) + 1rem) 1.5rem;
+  }
+
+  :global(.has-3d) .column {
+    width: min(56%, 52rem);
+  }
+
+  :global(.has-3d) h2 {
+    color: var(--muted-on-ink);
+    font-size: clamp(1rem, 1.3vw, 1.25rem);
+    font-stretch: 100%;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  :global(.has-3d) .list {
+    display: grid;
+    margin-top: 1rem;
+  }
+
+  :global(.has-3d) .item {
+    display: contents;
+  }
+
+  :global(.has-3d) h3 {
+    padding-block: 0.35rem;
+    color: var(--dim-on-ink);
+    font-size: clamp(2rem, 4.2vw, 4.5rem);
+    transition: color 0.3s linear;
+  }
+
+  :global(.has-3d) .is-active h3 {
+    color: var(--accent);
+  }
+
+  :global(.has-3d) .panel {
+    grid-row: 4;
+    grid-column: 1;
+    margin-top: clamp(1rem, 2.5vw, 2rem);
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition:
+      opacity 0.3s linear,
+      transform 0.45s var(--ease-out);
+  }
+
+  :global(.has-3d) .is-active .panel {
+    opacity: 1;
+    transform: none;
+  }
+
+  :global(.has-3d) .description {
+    margin-top: 0;
+  }
+
+  @media (max-width: 56.24rem) {
+    :global(.has-3d) .stage {
+      justify-content: flex-end;
+      padding-inline: var(--gutter);
+    }
+
+    :global(.has-3d) .column {
+      width: auto;
+    }
+
+    :global(.has-3d) h3 {
+      padding-block: 0.15rem;
+      font-size: clamp(1.5rem, 6.6vw, 2.75rem);
+    }
+
+    :global(.has-3d) .panel {
+      margin-top: 0.875rem;
+    }
+
+    :global(.has-3d) .description {
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    :global(.has-3d) .benefits {
+      gap: 0.25rem;
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+</style>

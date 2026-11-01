@@ -1,0 +1,28 @@
+---
+import About from '../components/About.astro';
+import Cta from '../components/Cta.astro';
+import Differentials from '../components/Differentials.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Portfolio from '../components/Portfolio.astro';
+import Process from '../components/Process.astro';
+import Scene3d from '../components/Scene3d.astro';
+import Services from '../components/Services.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base>
+  <Header />
+  <Scene3d />
+  <main id="conteudo">
+    <Hero />
+    <About />
+    <Services />
+    <Portfolio />
+    <Process />
+    <Differentials />
+    <Cta />
+  </main>
+  <Footer />
+</Base>
