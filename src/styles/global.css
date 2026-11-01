@@ -1,13 +1,13 @@
 /* Tokens da marca: paleta oficial lime e fonte do site. */
 :root {
-  --ink: #101114;
+  --ink: #000000;
   --paper: #f4f3ef;
   --accent: #c6f000;
-  --on-accent: #101114;
+  --on-accent: #000000;
   --muted-on-ink: #a8aba6;
   --dim-on-ink: #80837f;
   --muted-on-paper: #5a5d59;
-  --line-on-ink: #33353a;
+  --line-on-ink: #2e2e2e;
   --line-on-paper: #c9c8c2;
 
   --radius: clamp(1rem, 1.6vw, 1.75rem);
