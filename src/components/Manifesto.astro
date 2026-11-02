@@ -51,6 +51,12 @@ const words = text.split(' ');
     height: 240svh;
   }
 
+  @media (pointer: coarse) {
+    :global(.has-3d) .manifesto {
+      height: 320svh;
+    }
+  }
+
   .stage {
     display: grid;
     align-content: center;

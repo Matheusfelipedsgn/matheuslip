@@ -58,6 +58,17 @@ const rows = [
 </section>
 
 <script>
+  // Em rolagem rápida o carregamento preguiçoso chega tarde: as imagens começam antes de a seção entrar.
+  const section = document.querySelector<HTMLElement>('#projetos')!;
+  new IntersectionObserver(
+    ([entry], observer) => {
+      if (!entry.isIntersecting) return;
+      section.querySelectorAll('img').forEach((image) => (image.loading = 'eager'));
+      observer.disconnect();
+    },
+    { rootMargin: '150% 0px' },
+  ).observe(section);
+
   const SPEED = 0.05; // pixels por milissegundo
   const RESUME_AFTER = 1800;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

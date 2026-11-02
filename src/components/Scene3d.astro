@@ -5,12 +5,30 @@
 
   if (root.classList.contains('has-3d')) {
     // O three.js só carrega depois da página: o texto e o CTA nunca esperam pelo 3D.
-    const load = () =>
+    let started = false;
+    const load = () => {
+      if (started) return;
+      started = true;
       import('../scripts/scene3d')
         .then(({ startScene3d }) => startScene3d(document.querySelector<HTMLCanvasElement>('[data-scene]')!))
         .catch(() => root.classList.remove('has-3d'));
+    };
     if (document.readyState === 'complete') load();
     else addEventListener('load', load, { once: true });
+    // Em rede lenta o evento "load" pode demorar: a cena não espera por ele indefinidamente.
+    setTimeout(load, 2000);
+
+    // Quem rola antes de a cena ficar pronta já vê o texto e o menu, em vez de uma tela vazia.
+    const early = () => {
+      if (root.classList.contains('is-ready')) {
+        removeEventListener('scroll', early);
+      } else if (scrollY > innerHeight * 0.25) {
+        root.classList.add('is-early');
+        document.querySelector('header')?.classList.remove('is-intro');
+        removeEventListener('scroll', early);
+      }
+    };
+    addEventListener('scroll', early, { passive: true });
   }
 </script>
 

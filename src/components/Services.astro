@@ -80,6 +80,12 @@ const total = String(services.length).padStart(2, '0');
     height: 520svh;
   }
 
+  @media (pointer: coarse) {
+    :global(.has-3d) .services {
+      height: 800svh;
+    }
+  }
+
   :global(.has-3d) .stage {
     position: sticky;
     top: 0;

@@ -43,6 +43,13 @@ import Symbol from '../assets/logo/volt-symbol.svg';
     height: 380svh;
   }
 
+  /* Uma deslizada no celular percorre muita tela: a cena precisa de mais caminho para não passar voando. */
+  @media (pointer: coarse) {
+    :global(.has-3d) .hero {
+      height: 550svh;
+    }
+  }
+
   :global(.has-3d) .anchor {
     top: calc(100% - 100svh);
   }
@@ -69,7 +76,23 @@ import Symbol from '../assets/logo/volt-symbol.svg';
     opacity: 0;
   }
 
-  /* Símbolo plano enquanto o 3D carrega. */
+  /* A pessoa rolou antes de o 3D ficar pronto: mostra as frases em vez de uma tela vazia. */
+  :global(.is-early:not(.is-ready)) [data-first],
+  :global(.is-early:not(.is-ready)) [data-second] {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  :global(.is-early:not(.is-ready)) .fallback,
+  :global(.is-early:not(.is-ready)) .hint {
+    display: none;
+  }
+
+  /* Símbolo plano enquanto o 3D carrega, nas cores da marca. */
+  .fallback :global(path:nth-child(-n + 2)) {
+    fill: var(--paper);
+  }
+
   .fallback {
     position: absolute;
     top: 50%;

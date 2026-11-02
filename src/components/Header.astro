@@ -127,6 +127,19 @@ import { nav } from '../data/site';
     }
   }
 
+  /* Desfocar o que passa atrás da barra custa um cálculo por quadro: no celular a barra é sólida. */
+  @media (pointer: coarse) {
+    .header::before {
+      background: rgb(0 0 0 / 0.96);
+      backdrop-filter: none;
+    }
+
+    .header.is-light::before,
+    .header.is-flash::before {
+      background: rgb(244 243 239 / 0.98);
+    }
+  }
+
   .bar {
     display: flex;
     align-items: center;

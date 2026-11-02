@@ -76,6 +76,12 @@ import { contact, emailUrl, gmailUrl, whatsappUrl } from '../data/site';
     height: 300svh;
   }
 
+  @media (pointer: coarse) {
+    :global(.has-3d) .cta {
+      height: 400svh;
+    }
+  }
+
   :global(.has-3d) .stage {
     position: sticky;
     top: 0;
@@ -98,6 +104,16 @@ import { contact, emailUrl, gmailUrl, whatsappUrl } from '../data/site';
   :global(.has-3d) .content {
     visibility: hidden;
     opacity: 0;
+  }
+
+  /* Quem chega aqui antes de o 3D ficar pronto vê o fechamento completo. */
+  :global(.is-early:not(.is-ready)) .stage {
+    background: var(--accent);
+  }
+
+  :global(.is-early:not(.is-ready)) .content {
+    visibility: visible;
+    opacity: 1;
   }
 
   .content {

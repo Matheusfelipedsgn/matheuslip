@@ -256,6 +256,85 @@ footer {
   }
 }
 
+/* Em telas de toque, recortar e escurecer uma seção alta repinta tudo a cada quadro, e as fotos
+   aparecem pela metade. Mesma diagonal, feita com peças pretas que só se movem. */
+@media (prefers-reduced-motion: no-preference) and (pointer: coarse) {
+  @supports (animation-timeline: view()) {
+    .t-in,
+    .t-out,
+    .t-slant-out,
+    .t-in.t-out,
+    .t-in.t-slant-out {
+      position: relative;
+      overflow: clip;
+      animation: none;
+      view-timeline: --section;
+    }
+
+    .t-in::before,
+    .t-slant-out::after,
+    .t-out::after {
+      position: absolute;
+      z-index: 2;
+      right: 0;
+      left: 0;
+      background: var(--ink);
+      content: '';
+      pointer-events: none;
+    }
+
+    .t-in::before {
+      top: 0;
+      height: 34vh;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      transform-origin: 50% 0;
+      animation: cover-in linear both;
+      animation-range: entry 0px entry 80vh;
+      animation-timeline: --section;
+    }
+
+    .t-slant-out::after {
+      bottom: 0;
+      height: 100vh;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 70%);
+      transform-origin: 50% 100%;
+      animation: cover-rise linear both;
+      animation-range: exit 0px exit 100vh;
+      animation-timeline: --section;
+    }
+
+    .t-out::after {
+      top: 0;
+      bottom: 0;
+      animation: cover-dim linear both;
+      animation-range: exit 0px exit 90vh;
+      animation-timeline: --section;
+    }
+  }
+}
+
+@keyframes cover-in {
+  to {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes cover-rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes cover-dim {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.6;
+  }
+}
+
 @keyframes section-in {
   from {
     clip-path: polygon(0 34vh, 100% 0, 100% 100%, 0 100%);

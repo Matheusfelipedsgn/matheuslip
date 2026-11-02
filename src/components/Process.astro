@@ -70,6 +70,12 @@ import { steps } from '../data/site';
     height: 320svh;
   }
 
+  @media (pointer: coarse) {
+    :global(.has-3d) .process {
+      height: 450svh;
+    }
+  }
+
   :global(.has-3d) .stage {
     position: sticky;
     top: 0;

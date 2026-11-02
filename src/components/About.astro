@@ -66,6 +66,19 @@ const life = [
   </div>
 </section>
 
+<script>
+  // As fotos começam a carregar antes de a seção entrar, para não aparecerem em branco na rolagem.
+  const about = document.querySelector<HTMLElement>('#sobre')!;
+  new IntersectionObserver(
+    ([entry], observer) => {
+      if (!entry.isIntersecting) return;
+      about.querySelectorAll('img').forEach((image) => (image.loading = 'eager'));
+      observer.disconnect();
+    },
+    { rootMargin: '150% 0px' },
+  ).observe(about);
+</script>
+
 <style>
   .about {
     padding-block: var(--section);
@@ -158,6 +171,7 @@ const life = [
 
   .snap :global(img) {
     width: 100%;
+    background: var(--line-on-paper);
     aspect-ratio: 4 / 5;
     border-radius: 0.5rem;
     object-fit: cover;
