@@ -27,6 +27,8 @@ const { smoothstep, lerp, clamp } = MathUtils;
 
 // Na ordem do SVG: bloco superior, bloco inferior, traço principal.
 const BASE_COLOR = [PAPER, PAPER, LIME];
+// Centro da abertura direita do V, em unidades do SVG a partir do centro do símbolo.
+const HOLE = { x: 84, y: 20 };
 const SCATTER = [
   { move: new Vector3(-74, 66, 60), spin: new Vector3(0.5, -0.65, 0.28) },
   { move: new Vector3(74, -66, 60), spin: new Vector3(-0.45, 0.6, -0.3) },
@@ -55,6 +57,8 @@ type Pose = {
   highlight: number; // peça acesa em lime; -1 usa as cores da marca
   wire: boolean;
   flash: number; // quanto o lime ocupa a tela, de 0 a 1
+  aimX?: number; // ponto do símbolo, em unidades do SVG, levado ao centro da tela
+  aimY?: number;
 };
 
 function buildSymbol() {
@@ -67,8 +71,8 @@ function buildSymbol() {
     const material = new MeshPhysicalMaterial({
       color: BASE_COLOR[index].clone(),
       metalness: 0.05,
-      roughness: 0.3,
-      clearcoat: 0.7,
+      roughness: 0.38,
+      clearcoat: 0.3,
       clearcoatRoughness: 0.22,
     });
     // Peça mais fina, com chanfro suave: lê como um objeto desenhado, não como um bloco extrudado.
@@ -112,12 +116,13 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   const header = document.querySelector<HTMLElement>('header')!;
   const marquee = document.querySelector<HTMLElement>('[data-marquee]')!;
   const hint = sections.hero.querySelector<HTMLElement>('[data-hint]')!;
+  const heroFirst = sections.hero.querySelector<HTMLElement>('[data-first]')!;
+  const heroSecond = sections.hero.querySelector<HTMLElement>('[data-second]')!;
   const servicesRail = sections.services.querySelector<HTMLElement>('[data-rail-track]')!;
   const serviceCount = servicesRail.children.length;
   const stepItems = [...sections.process.querySelectorAll<HTMLElement>('[data-item]')];
   const closingContent = sections.closing.querySelector<HTMLElement>('[data-closing]')!;
   const flashes = {
-    hero: sections.hero.querySelector<HTMLElement>('[data-flash]')!,
     closing: sections.closing.querySelector<HTMLElement>('[data-flash]')!,
   };
 
@@ -200,21 +205,28 @@ export function startScene3d(canvas: HTMLCanvasElement) {
 
   const poses: Record<Track, (p: number) => Pose> = {
     hero(p) {
-      hint.style.opacity = String(1 - smoothstep(p, 0.02, 0.12));
-      marquee.style.opacity = String(1 - smoothstep(p, 0.15, 0.4));
-      const zoom = smoothstep(p, 0.12, 0.9);
+      hint.style.opacity = String(1 - smoothstep(p, 0.02, 0.1));
+      marquee.style.opacity = String(1 - smoothstep(p, 0.12, 0.34));
+      header.classList.toggle('is-intro', p < 0.6);
+      // A câmera atravessa a abertura direita do V. Com o símbolo para trás, as frases nascem do preto.
+      const zoom = smoothstep(p, 0.08, 0.62);
+      const title = smoothstep(p, 0.56, 0.72);
+      const rest = smoothstep(p, 0.7, 0.84);
+      setBlock(heroFirst, title, 36 * (1 - title));
+      setBlock(heroSecond, rest, 24 * (1 - rest));
       return {
         x: 0.5,
         y: 0.5,
         size: narrow ? Math.min(viewW * 0.8, viewH * 0.38) : Math.min(viewW * 0.3, viewH * 0.48),
-        // A câmera atravessa o traço principal, e o lime dele vira o fundo da seção seguinte.
-        z: zoom * zoom * (CAMERA_Z - 1.3),
+        z: zoom * zoom * zoom * (CAMERA_Z + 0.6),
         rotX: 0.14 * (1 - zoom),
         rotY: -0.42 * (1 - zoom),
         scatter: 0,
         highlight: -1,
         wire: false,
-        flash: smoothstep(p, 0.72, 0.9),
+        flash: 0,
+        aimX: HOLE.x * smoothstep(p, 0.08, 0.3),
+        aimY: HOLE.y * smoothstep(p, 0.08, 0.3),
       };
     },
     services(p) {
@@ -340,7 +352,7 @@ export function startScene3d(canvas: HTMLCanvasElement) {
     const stage = stages[next].getBoundingClientRect();
     if (next === 'hero') marquee.style.transform = `translate3d(0, ${stage.top}px, 0)`;
 
-    const calm = 1 - pose.z / (CAMERA_Z - 1.3);
+    const calm = clamp(1 - pose.z / (CAMERA_Z - 1.3), 0, 1);
     const sway = Math.sin(now / 2400) * 0.08 * calm;
     const follow = entering ? 1 : damp;
     rotY += (pose.rotY + sway + pointerX * 0.4 * calm - rotY) * follow;
@@ -349,8 +361,9 @@ export function startScene3d(canvas: HTMLCanvasElement) {
 
     // A posição acompanha o palco sem suavização, para a peça rolar junto com a página.
     const depth = (CAMERA_Z - pose.z) / CAMERA_Z;
-    pivot.position.x = ((stage.left + pose.x * stage.width) / canvas.clientWidth - 0.5) * viewW * depth;
-    pivot.position.y = -((stage.top + pose.y * stage.height) / canvas.clientHeight - 0.5) * viewH * depth;
+    const unit = pose.size / symbolWidth;
+    pivot.position.x = ((stage.left + pose.x * stage.width) / canvas.clientWidth - 0.5) * viewW * depth - (pose.aimX ?? 0) * unit;
+    pivot.position.y = -((stage.top + pose.y * stage.height) / canvas.clientHeight - 0.5) * viewH * depth - (pose.aimY ?? 0) * unit;
     pivot.position.z = pose.z;
     pivot.rotation.set(rotX, rotY, -0.04 * calm);
     pivot.scale.setScalar(pose.size / symbolWidth);
@@ -367,13 +380,12 @@ export function startScene3d(canvas: HTMLCanvasElement) {
       piece.material.color.lerp(tint, mix);
       piece.material.wireframe = pose.wire;
       // Apagada, a peça vira preto brilhante e reflete o ambiente em vez de sumir no fundo.
-      piece.material.roughness = lerp(piece.material.roughness, lit ? 0.3 : 0.16, mix);
-      piece.material.clearcoat = lerp(piece.material.clearcoat, lit ? 0.7 : 1, mix);
+      piece.material.roughness = lerp(piece.material.roughness, lit ? 0.38 : 0.16, mix);
+      piece.material.clearcoat = lerp(piece.material.clearcoat, lit ? 0.3 : 1, mix);
       piece.material.envMapIntensity = lerp(piece.material.envMapIntensity, lit ? 1 : 3.2, mix);
     });
 
-    if (next === 'hero') header.classList.toggle('is-intro', pose.flash < 0.6);
-    if (next === 'hero' || next === 'closing') {
+    if (next === 'closing') {
       flashes[next].style.opacity = String(pose.flash);
       header.classList.toggle('is-flash', pose.flash > 0.5 && stage.top <= 34 && stage.bottom > 34);
     } else {

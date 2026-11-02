@@ -4,7 +4,7 @@ const text =
 const words = text.split(' ');
 ---
 
-<section class="manifesto t-slant-out" aria-label="Como pensamos design" data-light data-manifesto>
+<section class="manifesto t-in t-slant-out" aria-label="Como pensamos design" data-light data-manifesto>
   <div class="stage">
     <p class="text">
       {words.map((word) => <span class="word" data-word>{word} </span>)}
@@ -43,8 +43,8 @@ const words = text.split(' ');
 
 <style>
   .manifesto {
-    background: var(--accent);
-    color: var(--on-accent);
+    background: var(--paper);
+    color: var(--ink);
   }
 
   :global(.has-3d) .manifesto {

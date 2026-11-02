@@ -237,11 +237,21 @@ footer {
       animation-timeline: view(), view();
     }
 
-    /* O lime sai cortado pela diagonal, revelando o preto da seção seguinte. */
+    /* A seção sai cortada pela diagonal, revelando o preto da seção seguinte. */
     .t-slant-out {
       animation: slant-out linear both;
       animation-range: exit 0px exit 100vh;
       animation-timeline: view();
+    }
+
+    .t-in.t-slant-out {
+      animation:
+        section-in linear both,
+        slant-out linear both;
+      animation-range:
+        entry 0px entry 80vh,
+        exit 0px exit 100vh;
+      animation-timeline: view(), view();
     }
   }
 }
