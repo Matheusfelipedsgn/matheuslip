@@ -68,7 +68,8 @@ const words = text.split(' ');
 
   .text {
     max-width: 22ch;
-    font-size: clamp(2.125rem, 7vw, 7.5rem);
+    /* A altura também limita o tamanho: em telas baixas o texto não pode entrar sob a barra. */
+    font-size: clamp(2rem, min(6.6vw, 10.5vh), 7.5rem);
     font-stretch: 118%;
     font-weight: 700;
     letter-spacing: -0.02em;

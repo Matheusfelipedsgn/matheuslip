@@ -7,6 +7,7 @@ import Symbol from '../assets/logo/volt-symbol.svg';
   <div class="stage" data-stage>
     <Symbol class="fallback" aria-hidden="true" />
     <p class="hint" aria-hidden="true" data-hint>Role para entrar</p>
+    <div class="flash" aria-hidden="true" data-flash></div>
 
     <div class="wrap content">
       <div data-first>
@@ -39,7 +40,7 @@ import Symbol from '../assets/logo/volt-symbol.svg';
   }
 
   :global(.has-3d) .hero {
-    height: 420svh;
+    height: 380svh;
   }
 
   :global(.has-3d) .anchor {
@@ -49,10 +50,10 @@ import Symbol from '../assets/logo/volt-symbol.svg';
   .stage {
     position: relative;
     display: grid;
-    align-items: end;
+    align-items: center;
     overflow: clip;
     min-height: 100svh;
-    padding-block: calc(var(--header-h) + 2rem) clamp(1.5rem, 5vh, 3.5rem);
+    padding-block: calc(var(--header-h) + 1rem) 1.5rem;
   }
 
   :global(.has-3d) .stage {
@@ -103,9 +104,24 @@ import Symbol from '../assets/logo/volt-symbol.svg';
     display: block;
   }
 
+  /* Lime exato da marca: cobre a tela no fim do zoom e abre em diagonal. */
+  .flash {
+    position: absolute;
+    display: none;
+    background: var(--accent);
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(.has-3d) .flash {
+    display: block;
+  }
+
   .content {
     position: relative;
     width: 100%;
+    text-align: center;
   }
 
   .name {
@@ -115,43 +131,32 @@ import Symbol from '../assets/logo/volt-symbol.svg';
   }
 
   h1 {
-    max-width: 16ch;
-    font-size: clamp(2.5rem, 7.4vw, 8rem);
+    max-width: 17ch;
+    margin-inline: auto;
+    font-size: clamp(2.25rem, min(6.6vw, 11.5vh), 7.5rem);
     letter-spacing: -0.025em;
     line-height: 0.98;
   }
 
   .closing {
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    align-items: end;
-    column-gap: clamp(1rem, 2vw, 2rem);
-    margin-top: clamp(2rem, 5vh, 4rem);
+    justify-items: center;
+    gap: 1.5rem;
+    margin-top: clamp(1.5rem, 4vh, 3rem);
   }
 
   .lead {
-    grid-column: 1 / span 5;
+    max-width: 38rem;
     color: var(--muted-on-ink);
-    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+    font-size: clamp(1rem, 1.3vw, 1.25rem);
     line-height: 1.45;
   }
 
   .actions {
-    grid-column: 7 / -1;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 1rem 1.75rem;
-  }
-
-  @media (max-width: 56.24rem) {
-    .lead,
-    .actions {
-      grid-column: 1 / -1;
-    }
-
-    .actions {
-      margin-top: 1.25rem;
-    }
   }
 </style>

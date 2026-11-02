@@ -27,8 +27,6 @@ const { smoothstep, lerp, clamp } = MathUtils;
 
 // Na ordem do SVG: bloco superior, bloco inferior, traço principal.
 const BASE_COLOR = [PAPER, PAPER, LIME];
-// Centro da abertura direita do V, em unidades do SVG a partir do centro do símbolo.
-const HOLE = { x: 84, y: 20 };
 const SCATTER = [
   { move: new Vector3(-74, 66, 60), spin: new Vector3(0.5, -0.65, 0.28) },
   { move: new Vector3(74, -66, 60), spin: new Vector3(-0.45, 0.6, -0.3) },
@@ -57,8 +55,6 @@ type Pose = {
   highlight: number; // peça acesa em lime; -1 usa as cores da marca
   wire: boolean;
   flash: number; // quanto o lime ocupa a tela, de 0 a 1
-  aimX?: number; // ponto do símbolo, em unidades do SVG, levado ao centro da tela
-  aimY?: number;
 };
 
 function buildSymbol() {
@@ -118,6 +114,7 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   const hint = sections.hero.querySelector<HTMLElement>('[data-hint]')!;
   const heroFirst = sections.hero.querySelector<HTMLElement>('[data-first]')!;
   const heroSecond = sections.hero.querySelector<HTMLElement>('[data-second]')!;
+  const heroFlash = sections.hero.querySelector<HTMLElement>('[data-flash]')!;
   const servicesRail = sections.services.querySelector<HTMLElement>('[data-rail-track]')!;
   const serviceCount = servicesRail.children.length;
   const stepItems = [...sections.process.querySelectorAll<HTMLElement>('[data-item]')];
@@ -139,8 +136,9 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   pmrem.dispose();
   scene.environmentIntensity = 0.42;
 
-  const key = new DirectionalLight('#ffffff', 1.95);
-  key.position.set(-1.5, 1.5, 8);
+  const key = new DirectionalLight('#ffffff', 2.5);
+  // Luz oblíqua: de frente, o reflexo lavaria o lime de branco quando a câmera se aproxima.
+  key.position.set(-5, 6, 6);
   const rim = new DirectionalLight('#ffffff', 0.5);
   rim.position.set(5, -2, -3);
   scene.add(key, rim);
@@ -206,27 +204,31 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   const poses: Record<Track, (p: number) => Pose> = {
     hero(p) {
       hint.style.opacity = String(1 - smoothstep(p, 0.02, 0.1));
-      marquee.style.opacity = String(1 - smoothstep(p, 0.12, 0.34));
-      header.classList.toggle('is-intro', p < 0.6);
-      // A câmera atravessa a abertura direita do V. Com o símbolo para trás, as frases nascem do preto.
-      const zoom = smoothstep(p, 0.08, 0.62);
-      const title = smoothstep(p, 0.56, 0.72);
-      const rest = smoothstep(p, 0.7, 0.84);
+      marquee.style.opacity = String(1 - smoothstep(p, 0.12, 0.32));
+      header.classList.toggle('is-intro', p < 0.66);
+      // A câmera aproxima do traço verde até o lime tomar a tela.
+      const zoom = smoothstep(p, 0.08, 0.58);
+      const fill = smoothstep(p, 0.53, 0.6);
+      // O lime abre pela diagonal da marca e revela as frases sobre o preto.
+      const open = smoothstep(p, 0.6, 0.74);
+      const edge = open * 170;
+      heroFlash.style.opacity = String(fill);
+      heroFlash.style.clipPath = `polygon(${edge}% 0, 170% 0, 100% 100%, ${edge - 70}% 100%)`;
+      const title = smoothstep(p, 0.68, 0.8);
+      const rest = smoothstep(p, 0.78, 0.9);
       setBlock(heroFirst, title, 36 * (1 - title));
       setBlock(heroSecond, rest, 24 * (1 - rest));
       return {
         x: 0.5,
         y: 0.5,
         size: narrow ? Math.min(viewW * 0.8, viewH * 0.38) : Math.min(viewW * 0.3, viewH * 0.48),
-        z: zoom * zoom * zoom * (CAMERA_Z + 0.6),
+        z: zoom * zoom * (CAMERA_Z - 0.75),
         rotX: 0.14 * (1 - zoom),
         rotY: -0.42 * (1 - zoom),
         scatter: 0,
         highlight: -1,
         wire: false,
-        flash: 0,
-        aimX: HOLE.x * smoothstep(p, 0.08, 0.3),
-        aimY: HOLE.y * smoothstep(p, 0.08, 0.3),
+        flash: fill,
       };
     },
     services(p) {
@@ -361,9 +363,8 @@ export function startScene3d(canvas: HTMLCanvasElement) {
 
     // A posição acompanha o palco sem suavização, para a peça rolar junto com a página.
     const depth = (CAMERA_Z - pose.z) / CAMERA_Z;
-    const unit = pose.size / symbolWidth;
-    pivot.position.x = ((stage.left + pose.x * stage.width) / canvas.clientWidth - 0.5) * viewW * depth - (pose.aimX ?? 0) * unit;
-    pivot.position.y = -((stage.top + pose.y * stage.height) / canvas.clientHeight - 0.5) * viewH * depth - (pose.aimY ?? 0) * unit;
+    pivot.position.x = ((stage.left + pose.x * stage.width) / canvas.clientWidth - 0.5) * viewW * depth;
+    pivot.position.y = -((stage.top + pose.y * stage.height) / canvas.clientHeight - 0.5) * viewH * depth;
     pivot.position.z = pose.z;
     pivot.rotation.set(rotX, rotY, -0.04 * calm);
     pivot.scale.setScalar(pose.size / symbolWidth);
