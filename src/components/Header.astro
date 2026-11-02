@@ -3,9 +3,9 @@ import Wordmark from '../assets/logo/volt-wordmark.svg';
 import { nav } from '../data/site';
 ---
 
-<header class="header">
+<header class="header is-intro">
   <div class="wrap bar">
-    <a class="brand" href="#top" aria-label="Volt Estúdio Criativo, início">
+    <a class="brand" href="#inicio" aria-label="Volt Estúdio Criativo, início">
       <Wordmark class="logo" aria-hidden="true" />
     </a>
 
@@ -63,7 +63,8 @@ import { nav } from '../data/site';
       }
       header.classList.toggle('is-light', under.size > 0);
     },
-    { rootMargin: '0px 0px -96% 0px' },
+    // A margem superior evita contar como "embaixo da barra" uma seção que só encosta no topo.
+    { rootMargin: '-1px 0px -96% 0px' },
   );
   document.querySelectorAll('[data-light]').forEach((section) => observer.observe(section));
 </script>
@@ -72,13 +73,30 @@ import { nav } from '../data/site';
   .header {
     position: fixed;
     z-index: 20;
-    top: 0;
-    right: 0;
-    left: 0;
-    transition: color 0.2s linear;
+    top: 0.75rem;
+    right: var(--gutter);
+    left: var(--gutter);
+    max-width: 100rem;
+    margin-inline: auto;
+    transition:
+      color 0.2s linear,
+      opacity 0.35s linear,
+      visibility 0.35s linear;
   }
 
-  .header.is-light {
+  /* Na cena de abertura só existe o símbolo; a barra entra junto com o site. */
+  :global(.has-3d) .header.is-intro {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .header {
+    --logo-accent: var(--accent);
+  }
+
+  .header.is-light,
+  .header.is-flash {
+    --logo-accent: var(--ink);
     color: var(--ink);
   }
 
@@ -88,24 +106,24 @@ import { nav } from '../data/site';
     position: absolute;
     z-index: -1;
     background: rgb(0 0 0 / 0.94);
-    box-shadow:
-      inset 0 -1px 0 rgb(244 243 239 / 0.12),
-      inset 0 1px 0 rgb(244 243 239 / 0.04);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgb(244 243 239 / 0.14);
     content: '';
     inset: 0;
   }
 
   @supports (backdrop-filter: blur(1px)) {
     .header::before {
-      background: rgb(0 0 0 / 0.62);
-      backdrop-filter: blur(16px) saturate(170%);
+      background: rgb(0 0 0 / 0.55);
+      backdrop-filter: blur(24px) saturate(180%);
       transition: background-color 0.2s linear;
     }
 
     /* Sobre seções claras o vidro também clareia, em vez de virar um cinza pesado. */
-    .header.is-light::before {
-      background: rgb(244 243 239 / 0.58);
-      box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.12);
+    .header.is-light::before,
+    .header.is-flash::before {
+      background: rgb(244 243 239 / 0.76);
+      box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
     }
   }
 
@@ -113,7 +131,8 @@ import { nav } from '../data/site';
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: var(--header-h);
+    height: 3.5rem;
+    padding-inline: 1.25rem 0.5rem;
   }
 
   .brand {
@@ -129,7 +148,7 @@ import { nav } from '../data/site';
   .toggle {
     min-width: 3rem;
     min-height: 2.75rem;
-    padding: 0;
+    padding: 0 0.75rem;
     border: 0;
     background: none;
     color: inherit;
@@ -142,21 +161,41 @@ import { nav } from '../data/site';
   .menu ul {
     display: flex;
     align-items: center;
-    gap: clamp(1.25rem, 2.5vw, 2.5rem);
+    gap: 0.25rem;
   }
 
   .menu a {
     display: block;
-    padding-block: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
     font-weight: 500;
-    text-decoration: underline transparent 2px;
-    text-underline-offset: 0.35em;
-    transition: text-decoration-color 0.15s linear;
+    text-decoration: none;
+    transition: background-color 0.15s linear;
   }
 
   .menu a:hover,
   .menu a:focus-visible {
-    text-decoration-color: currentColor;
+    background: rgb(128 128 128 / 0.22);
+  }
+
+  @media (min-width: 56.25rem) {
+    .menu .contact {
+      margin-left: 0.5rem;
+      background: var(--accent);
+      color: var(--on-accent);
+      font-weight: 600;
+    }
+
+    .menu .contact:hover,
+    .menu .contact:focus-visible {
+      background: var(--paper);
+    }
+
+    .is-light .menu .contact,
+    .is-flash .menu .contact {
+      background: var(--ink);
+      color: var(--paper);
+    }
   }
 
   @media (min-width: 56.25rem) {
@@ -168,9 +207,10 @@ import { nav } from '../data/site';
   @media (max-width: 56.24rem) {
     .menu {
       position: fixed;
-      inset: var(--header-h) 0 0;
+      z-index: -1;
+      inset: 0;
       visibility: hidden;
-      padding: 2rem var(--gutter);
+      padding: calc(var(--header-h) + 2rem) var(--gutter) 2rem;
       background: var(--ink);
       opacity: 0;
       transition:
@@ -191,16 +231,22 @@ import { nav } from '../data/site';
     }
 
     .menu a {
+      padding-inline: 0;
       font-size: 2rem;
       font-stretch: 118%;
       font-weight: 700;
       line-height: 1.2;
     }
 
+    .menu a:hover,
+    .menu a:focus-visible {
+      background: none;
+      color: var(--accent);
+    }
+
     .menu .contact {
       margin-top: 1.5rem;
-      color: var(--paper);
-      text-decoration-color: var(--accent);
+      color: var(--accent);
     }
   }
 </style>

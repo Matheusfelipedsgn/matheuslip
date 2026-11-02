@@ -2,11 +2,15 @@
 import { Image } from 'astro:assets';
 import { contact, projects } from '../data/site';
 
-// A segunda faixa repete a primeira para o carrossel fechar o ciclo sem emenda.
-const tracks = [false, true];
+// Duas faixas em sentidos opostos: sites e redes sociais em uma, marcas e motion na outra.
+const brandWork = ['Identidade visual', 'Motion'];
+const rows = [
+  { direction: 1, items: projects.filter((project) => !brandWork.includes(project.category)) },
+  { direction: -1, items: projects.filter((project) => brandWork.includes(project.category)) },
+];
 ---
 
-<section id="projetos" class="section on-ink" aria-labelledby="projetos-title">
+<section id="projetos" class="section on-ink projects t-out" aria-labelledby="projetos-title">
   <div class="wrap head reveal">
     <h2 id="projetos-title">Projetos</h2>
     <a class="text-link" href={contact.behance} target="_blank" rel="noopener">
@@ -14,40 +18,147 @@ const tracks = [false, true];
     </a>
   </div>
 
-  <div class="marquee reveal">
+  <div class="rows reveal">
     {
-      tracks.map((duplicate) => (
-        <ul class:list={['track', { duplicate }]} aria-hidden={duplicate ? 'true' : undefined}>
-          {projects.map((project) => (
-            <li class="item">
-              <a
-                class="card"
-                href={project.url}
-                target="_blank"
-                rel="noopener"
-                tabindex={duplicate ? -1 : undefined}
-              >
-                <span class="frame">
-                  <Image
-                    class="shot"
-                    src={project.image}
-                    alt={duplicate ? '' : project.alt}
-                    widths={[420, 640, 808]}
-                    sizes="(min-width: 56.25rem) 30vw, 78vw"
-                  />
-                </span>
-                <span class="name">{project.name}</span>
-                <span class="category">{project.category}</span>
-              </a>
-            </li>
+      rows.map((row) => (
+        <div class="rail" data-rail data-direction={row.direction}>
+          {[false, true].map((duplicate) => (
+            <ul class:list={['track', { duplicate }]} aria-hidden={duplicate ? 'true' : undefined}>
+              {row.items.map((project) => (
+                <li class="item">
+                  <a
+                    class="card"
+                    href={project.url}
+                    target="_blank"
+                    rel="noopener"
+                    draggable="false"
+                    tabindex={duplicate ? -1 : undefined}
+                  >
+                    <span class="frame">
+                      <Image
+                        class="shot"
+                        src={project.image}
+                        alt={duplicate ? '' : project.alt}
+                        widths={[420, 640, 808]}
+                        sizes="(min-width: 56.25rem) 28vw, 74vw"
+                        draggable="false"
+                      />
+                    </span>
+                    <span class="name">{project.name}</span>
+                    <span class="category">{project.category}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           ))}
-        </ul>
+        </div>
       ))
     }
   </div>
 </section>
 
+<script>
+  const SPEED = 0.05; // pixels por milissegundo
+  const RESUME_AFTER = 1800;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-rail]').forEach((rail) => {
+    if (reduced) return;
+    rail.classList.add('is-live');
+
+    const direction = Number(rail.dataset.direction);
+    const half = () => rail.scrollWidth / 2;
+    let position = direction > 0 ? 0 : half();
+    let hovering = false;
+    let holdUntil = 0;
+    let visible = false;
+    let last = performance.now();
+
+    const wrap = (value: number) => {
+      const size = half();
+      if (value >= size) return value - size;
+      if (value < 0) return value + size;
+      return value;
+    };
+
+    const tick = (now: number) => {
+      const dt = Math.min(now - last, 60);
+      last = now;
+      if (visible && !hovering && now > holdUntil) {
+        position = wrap(position + direction * SPEED * dt);
+        rail.scrollLeft = position;
+      }
+      requestAnimationFrame(tick);
+    };
+
+    // Quem arrasta assume o controle: a faixa fecha o ciclo e retoma de onde a pessoa parou.
+    rail.addEventListener(
+      'scroll',
+      () => {
+        if (hovering || performance.now() < holdUntil) {
+          position = wrap(rail.scrollLeft);
+          if (position !== rail.scrollLeft) rail.scrollLeft = position;
+        }
+      },
+      { passive: true },
+    );
+    const hold = () => (holdUntil = performance.now() + RESUME_AFTER);
+    rail.addEventListener('touchstart', hold, { passive: true });
+    rail.addEventListener('touchmove', hold, { passive: true });
+    rail.addEventListener('touchend', hold, { passive: true });
+    rail.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') hovering = true;
+    });
+    rail.addEventListener('pointerleave', () => {
+      hovering = false;
+      dragging = false;
+      rail.classList.remove('is-dragging');
+    });
+    rail.addEventListener('focusin', () => (hovering = true));
+    rail.addEventListener('focusout', () => (hovering = false));
+
+    // Arrastar com o mouse; um arrasto longo não conta como clique no card.
+    let dragging = false;
+    let moved = 0;
+    let startX = 0;
+    let startScroll = 0;
+    rail.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      dragging = true;
+      moved = 0;
+      startX = event.clientX;
+      startScroll = rail.scrollLeft;
+      rail.classList.add('is-dragging');
+    });
+    rail.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      moved = Math.abs(event.clientX - startX);
+      rail.scrollLeft = wrap(startScroll - (event.clientX - startX));
+      position = rail.scrollLeft;
+    });
+    addEventListener('pointerup', () => {
+      dragging = false;
+      rail.classList.remove('is-dragging');
+    });
+    rail.addEventListener(
+      'click',
+      (event) => {
+        if (moved > 6) event.preventDefault();
+      },
+      true,
+    );
+
+    new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(rail);
+    rail.scrollLeft = position;
+    requestAnimationFrame(tick);
+  });
+</script>
+
 <style>
+  .projects {
+    overflow-x: clip;
+  }
+
   .head {
     display: flex;
     flex-wrap: wrap;
@@ -57,12 +168,50 @@ const tracks = [false, true];
     margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
   }
 
-  .marquee {
-    --gap: clamp(1rem, 2vw, 2rem);
+  .rows {
+    display: grid;
+    gap: clamp(1.75rem, 3vw, 3rem);
+    transform-origin: 50% 0;
+  }
+
+  /* A parede de projetos chega inclinada em perspectiva e se endireita com a rolagem. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .rows.reveal {
+        animation: wall-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 42%;
+      }
+    }
+  }
+
+  @keyframes wall-in {
+    from {
+      opacity: 0.2;
+      transform: perspective(1400px) rotateX(26deg) rotateZ(-5deg) scale(1.12);
+    }
+  }
+
+  .rail {
+    --gap: clamp(0.875rem, 1.6vw, 1.5rem);
     display: flex;
     overflow-x: auto;
-    padding-bottom: 0.5rem;
+    padding-inline: var(--gutter);
     scrollbar-width: none;
+  }
+
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rail.is-live {
+    padding-inline: 0;
+    cursor: grab;
+  }
+
+  .rail.is-dragging {
+    cursor: grabbing;
+    user-select: none;
   }
 
   .track {
@@ -72,44 +221,23 @@ const tracks = [false, true];
     padding-right: var(--gap);
   }
 
-  /* Sem animação (movimento reduzido), a faixa vira uma lista que se rola com o dedo. */
+  /* A repetição só existe com o movimento ligado; sem ele, é uma lista simples para rolar. */
   .duplicate {
     display: none;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .marquee {
-      overflow-x: clip;
-    }
-
-    .duplicate {
-      display: flex;
-    }
-
-    .track {
-      animation: marquee 70s linear infinite;
-    }
-
-    /* Para enquanto a pessoa aponta para um card ou navega por ele com o teclado. */
-    .marquee:hover .track,
-    .marquee:focus-within .track {
-      animation-play-state: paused;
-    }
-  }
-
-  @keyframes marquee {
-    to {
-      transform: translateX(-100%);
-    }
+  .is-live .duplicate {
+    display: flex;
   }
 
   .item {
-    width: clamp(16.5rem, 30vw, 30rem);
+    width: clamp(15rem, 27vw, 27rem);
   }
 
   .card {
     display: block;
     text-decoration: none;
+    -webkit-user-drag: none;
   }
 
   .frame {
@@ -129,8 +257,8 @@ const tracks = [false, true];
 
   .name {
     display: block;
-    margin-top: 1rem;
-    font-size: clamp(1.25rem, 1.8vw, 1.75rem);
+    margin-top: 0.875rem;
+    font-size: clamp(1.125rem, 1.5vw, 1.5rem);
     font-stretch: 118%;
     font-weight: 700;
     line-height: 1.15;
@@ -139,8 +267,8 @@ const tracks = [false, true];
 
   .category {
     display: block;
-    margin-top: 0.125rem;
     color: var(--muted-on-ink);
+    font-size: 0.9375rem;
   }
 
   @media (hover: hover) {

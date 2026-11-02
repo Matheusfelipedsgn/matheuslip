@@ -21,27 +21,40 @@ import symbolSvg from '../assets/logo/volt-symbol.svg?raw';
 const FOV = 30;
 const CAMERA_Z = 10;
 const LIME = new Color('#c6f000');
+const PAPER = new Color('#f4f3ef');
 const DIM = new Color('#141518');
 const { smoothstep, lerp, clamp } = MathUtils;
 
-// Direção em que cada peça se afasta, na ordem do SVG: bloco superior, bloco inferior, traço principal.
+// Na ordem do SVG: bloco superior, bloco inferior, traço principal.
+const BASE_COLOR = [PAPER, PAPER, LIME];
 const SCATTER = [
   { move: new Vector3(-74, 66, 60), spin: new Vector3(0.5, -0.65, 0.28) },
   { move: new Vector3(74, -66, 60), spin: new Vector3(-0.45, 0.6, -0.3) },
   { move: new Vector3(0, 0, -34), spin: new Vector3(0.08, 0.12, -0.08) },
 ];
 
-// Serviço em destaque -> peça: traço principal, bloco superior, bloco inferior.
-const SERVICE_PIECE = [2, 0, 1];
+// O que o objeto mostra em cada serviço: uma peça acesa, a estrutura em linhas ou o conjunto.
+const SERVICE_SCENES = [
+  { highlight: 2, wire: false, scatter: 1 },
+  { highlight: 0, wire: false, scatter: 1 },
+  { highlight: -1, wire: true, scatter: 0 },
+  { highlight: -1, wire: false, scatter: 0 },
+  { highlight: -1, wire: false, scatter: 0.55 },
+];
+
+type Track = 'hero' | 'services' | 'process' | 'closing';
 
 type Pose = {
   x: number; // centro da peça, em fração do palco
   y: number;
   size: number; // largura, em unidades do mundo
+  z: number;
   rotX: number;
   rotY: number;
   scatter: number;
-  highlight: number; // índice da peça acesa; -1 acende todas
+  highlight: number; // peça acesa em lime; -1 usa as cores da marca
+  wire: boolean;
+  flash: number; // quanto o lime ocupa a tela, de 0 a 1
 };
 
 function buildSymbol() {
@@ -50,21 +63,22 @@ function buildSymbol() {
   const box = new Box3();
   const pieces: { mesh: Mesh; material: MeshPhysicalMaterial; home: Vector3 }[] = [];
 
-  for (const path of paths) {
+  paths.forEach((path, index) => {
     const material = new MeshPhysicalMaterial({
-      color: LIME.clone(),
-      metalness: 0,
-      roughness: 0.42,
-      clearcoat: 0.25,
-      clearcoatRoughness: 0.3,
+      color: BASE_COLOR[index].clone(),
+      metalness: 0.05,
+      roughness: 0.3,
+      clearcoat: 0.7,
+      clearcoatRoughness: 0.22,
     });
+    // Peça mais fina, com chanfro suave: lê como um objeto desenhado, não como um bloco extrudado.
     const geometry = new ExtrudeGeometry(path.toShapes(true), {
-      depth: 44,
+      depth: 18,
       bevelEnabled: true,
-      bevelSize: 2.4,
-      bevelThickness: 3.2,
-      bevelSegments: 5,
-      curveSegments: 24,
+      bevelSize: 2.2,
+      bevelThickness: 2.6,
+      bevelSegments: 6,
+      curveSegments: 32,
     });
     // O SVG tem o eixo Y para baixo. Girar (em vez de espelhar) mantém as normais corretas.
     geometry.rotateX(Math.PI);
@@ -72,7 +86,7 @@ function buildSymbol() {
     pivot.add(mesh);
     box.expandByObject(mesh);
     pieces.push({ mesh, material, home: new Vector3() });
-  }
+  });
 
   const center = box.getCenter(new Vector3());
   // Cada peça gira em torno do próprio centro, senão ela orbita em vez de girar.
@@ -87,23 +101,30 @@ function buildSymbol() {
 }
 
 export function startScene3d(canvas: HTMLCanvasElement) {
-  const sections = {
-    hero: document.querySelector<HTMLElement>('[data-track="hero"]')!,
-    services: document.querySelector<HTMLElement>('[data-track="services"]')!,
-    process: document.querySelector<HTMLElement>('[data-track="process"]')!,
-  };
-  const names = Object.keys(sections) as (keyof typeof sections)[];
+  const names: Track[] = ['hero', 'services', 'process', 'closing'];
+  const sections = Object.fromEntries(
+    names.map((name) => [name, document.querySelector<HTMLElement>(`[data-track="${name}"]`)!]),
+  ) as Record<Track, HTMLElement>;
   const stages = Object.fromEntries(
     names.map((name) => [name, sections[name].querySelector<HTMLElement>('[data-stage]')!]),
-  ) as Record<keyof typeof sections, HTMLElement>;
+  ) as Record<Track, HTMLElement>;
 
-  const heroFirst = sections.hero.querySelector<HTMLElement>('[data-first]')!;
-  const heroSecond = sections.hero.querySelector<HTMLElement>('[data-second]')!;
-  const serviceItems = [...sections.services.querySelectorAll<HTMLElement>('[data-item]')];
+  const header = document.querySelector<HTMLElement>('header')!;
+  const marquee = document.querySelector<HTMLElement>('[data-marquee]')!;
+  const hint = sections.hero.querySelector<HTMLElement>('[data-hint]')!;
+  const servicesRail = sections.services.querySelector<HTMLElement>('[data-rail-track]')!;
+  const serviceCount = servicesRail.children.length;
   const stepItems = [...sections.process.querySelectorAll<HTMLElement>('[data-item]')];
+  const closingContent = sections.closing.querySelector<HTMLElement>('[data-closing]')!;
+  const flashes = {
+    hero: sections.hero.querySelector<HTMLElement>('[data-flash]')!,
+    closing: sections.closing.querySelector<HTMLElement>('[data-flash]')!,
+  };
 
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  // Aparelhos com pouca memória ou poucos núcleos renderizam em resolução menor.
+  const modest = (navigator.hardwareConcurrency ?? 8) <= 4;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, modest ? 1.25 : 1.75));
   // Sem tone mapping: a face frontal precisa chegar perto do lime da marca (#C6F000).
   renderer.toneMapping = NoToneMapping;
 
@@ -111,9 +132,9 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   const pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
   pmrem.dispose();
-  scene.environmentIntensity = 0.3;
+  scene.environmentIntensity = 0.42;
 
-  const key = new DirectionalLight('#ffffff', 2.1);
+  const key = new DirectionalLight('#ffffff', 1.95);
   key.position.set(-1.5, 1.5, 8);
   const rim = new DirectionalLight('#ffffff', 0.5);
   rim.position.set(5, -2, -3);
@@ -128,6 +149,18 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   let viewW = 1;
   let viewH = 1;
   let narrow = false;
+  // No celular, a peça ocupa o espaço real entre a barra e o texto do palco.
+  const fit = { process: { y: 0.25, heightPx: 200 } };
+
+  const measure = () => {
+    const barBottom = header.getBoundingClientRect().bottom;
+    for (const name of ['process'] as const) {
+      const stage = stages[name];
+      const top = stage.querySelector<HTMLElement>('[data-column]')!.offsetTop;
+      const heightPx = Math.max(top - barBottom, 80);
+      fit[name] = { y: (barBottom + heightPx / 2) / stage.offsetHeight, heightPx };
+    }
+  };
 
   const resize = () => {
     const { clientWidth: w, clientHeight: h } = canvas;
@@ -137,11 +170,19 @@ export function startScene3d(canvas: HTMLCanvasElement) {
     viewH = 2 * Math.tan(MathUtils.degToRad(FOV / 2)) * CAMERA_Z;
     viewW = viewH * camera.aspect;
     narrow = w < 900;
+    measure();
   };
   new ResizeObserver(resize).observe(canvas);
   resize();
+  document.fonts?.ready.then(measure);
 
-  const progressOf = (name: keyof typeof sections) => {
+  // Largura da peça para caber na altura disponível; `spread` reserva espaço para as peças soltas.
+  const narrowSize = (name: 'process', spread: number) => {
+    const heightWorld = (fit[name].heightPx / canvas.clientHeight) * viewH;
+    return Math.min(viewW * 0.8, (heightWorld * 0.86 * (297 / 215)) / spread);
+  };
+
+  const progressOf = (name: Track) => {
     const rect = sections[name].getBoundingClientRect();
     const range = rect.height - stages[name].offsetHeight;
     return range > 0 ? clamp(-rect.top / range, 0, 1) : 0;
@@ -157,46 +198,81 @@ export function startScene3d(canvas: HTMLCanvasElement) {
     items.forEach((item, i) => item.classList.toggle('is-active', i === index));
   };
 
-  const poses: Record<keyof typeof sections, (p: number) => Pose> = {
+  const poses: Record<Track, (p: number) => Pose> = {
     hero(p) {
-      const eased = smoothstep(p, 0, 1);
-      setBlock(heroFirst, 1 - smoothstep(p, 0.22, 0.42), -40 * smoothstep(p, 0.22, 0.42));
-      const reveal = smoothstep(p, 0.62, 0.84);
-      setBlock(heroSecond, reveal, 40 * (1 - reveal));
+      hint.style.opacity = String(1 - smoothstep(p, 0.02, 0.12));
+      marquee.style.opacity = String(1 - smoothstep(p, 0.15, 0.4));
+      const zoom = smoothstep(p, 0.12, 0.9);
       return {
-        x: narrow ? 0.5 : lerp(0.75, 0.25, eased),
-        y: narrow ? 0.25 : 0.5,
-        size: narrow ? Math.min(viewW * 0.6, viewH * 0.3) : Math.min(viewW * 0.4, viewH * 0.62),
-        rotX: 0.14,
-        rotY: -0.42 + eased * Math.PI * 2,
+        x: 0.5,
+        y: 0.5,
+        size: narrow ? Math.min(viewW * 0.8, viewH * 0.38) : Math.min(viewW * 0.3, viewH * 0.48),
+        // A câmera atravessa o traço principal, e o lime dele vira o fundo da seção seguinte.
+        z: zoom * zoom * (CAMERA_Z - 1.3),
+        rotX: 0.14 * (1 - zoom),
+        rotY: -0.42 * (1 - zoom),
         scatter: 0,
         highlight: -1,
+        wire: false,
+        flash: smoothstep(p, 0.72, 0.9),
       };
     },
     services(p) {
-      const index = Math.min(serviceItems.length - 1, Math.floor(p * serviceItems.length));
-      setActive(serviceItems, index);
+      // Cada serviço segura a tela por um tempo antes de deslizar para o próximo.
+      const steps = Math.min(p / 0.88, 1) * (serviceCount - 1);
+      const whole = Math.min(Math.floor(steps), serviceCount - 2);
+      const value = whole + smoothstep(steps - whole, 0.6, 1);
+      servicesRail.style.transform = `translate3d(${(-value * 100) / serviceCount}%, 0, 0)`;
+      const scenePick = SERVICE_SCENES[Math.round(value)];
+      // No fim da faixa as peças voam em direção à câmera e abrem caminho para os projetos.
+      const leave = smoothstep(p, 0.93, 1);
+      // O texto sai antes de as peças crescerem, para os dois nunca se sobreporem.
+      servicesRail.style.opacity = String(1 - smoothstep(p, 0.9, 0.94));
       return {
-        x: narrow ? 0.5 : 0.74,
-        y: narrow ? 0.24 : 0.5,
-        size: narrow ? Math.min(viewW * 0.5, viewH * 0.26) : Math.min(viewW * 0.3, viewH * 0.5),
-        rotX: 0.2,
-        rotY: lerp(-0.6, 0.5, p),
-        scatter: 1,
-        highlight: SERVICE_PIECE[index],
+        x: 0.5,
+        y: narrow ? 0.49 : 0.57,
+        size: narrow ? Math.min(viewW * 0.8, viewH * 0.38) : Math.min(viewW * 0.3, viewH * 0.42),
+        z: leave * (CAMERA_Z - 3),
+        rotX: 0.16,
+        rotY: -0.1 + Math.sin(steps * 1.57) * 0.34,
+        scatter: scenePick.scatter + leave * 2.4,
+        highlight: scenePick.highlight,
+        wire: scenePick.wire,
+        flash: 0,
       };
     },
     process(p) {
       setActive(stepItems, Math.min(stepItems.length - 1, Math.floor(p * stepItems.length)));
       const eased = smoothstep(p, 0.04, 0.82);
       return {
-        x: narrow ? 0.5 : 0.25,
-        y: narrow ? 0.24 : 0.5,
-        size: narrow ? Math.min(viewW * 0.42, viewH * 0.2) : Math.min(viewW * 0.3, viewH * 0.5),
-        rotX: lerp(0.6, 0.12, eased),
-        rotY: lerp(-1.25, -0.24, eased),
-        scatter: lerp(1.7, 0, eased),
+        x: 0.5,
+        y: fit.process.y,
+        // O tamanho sai do espaço acima do texto, em qualquer tela: as peças soltas nunca chegam ao título.
+        size: Math.min(narrowSize('process', 1.75), viewW * 0.3),
+        z: 0,
+        rotX: lerp(0.32, 0.1, eased),
+        rotY: lerp(-0.62, -0.2, eased),
+        scatter: lerp(0.8, 0, eased),
         highlight: -1,
+        wire: false,
+        flash: 0,
+      };
+    },
+    closing(p) {
+      const zoom = smoothstep(p, 0.2, 0.68);
+      const reveal = smoothstep(p, 0.62, 0.82);
+      setBlock(closingContent, reveal, 28 * (1 - reveal));
+      return {
+        x: 0.5,
+        y: 0.5,
+        size: narrow ? viewW * 0.7 : Math.min(viewW * 0.36, viewH * 0.56),
+        z: zoom * zoom * (CAMERA_Z - 1.3),
+        rotX: 0.16 * (1 - zoom),
+        rotY: -0.45 * (1 - zoom),
+        scatter: 0,
+        highlight: -1,
+        wire: false,
+        flash: smoothstep(p, 0.5, 0.64),
       };
     },
   };
@@ -212,8 +288,8 @@ export function startScene3d(canvas: HTMLCanvasElement) {
     { passive: true },
   );
 
-  const damped = Object.fromEntries(names.map((name) => [name, progressOf(name)])) as Record<keyof typeof sections, number>;
-  let current: keyof typeof sections | null = null;
+  const damped = Object.fromEntries(names.map((name) => [name, progressOf(name)])) as Record<Track, number>;
+  let current: Track | null = null;
   let last = performance.now();
   let rotX = 0;
   let rotY = 0;
@@ -230,7 +306,7 @@ export function startScene3d(canvas: HTMLCanvasElement) {
 
     // O objeto pertence ao palco mais próximo de estar fixado. O espaço entre os palcos é
     // maior que a tela, então a troca sempre acontece com ele fora de vista.
-    let next: keyof typeof sections | null = null;
+    let next: Track | null = null;
     let nearest = Infinity;
     for (const name of names) {
       const rect = stages[name].getBoundingClientRect();
@@ -242,7 +318,11 @@ export function startScene3d(canvas: HTMLCanvasElement) {
       }
     }
 
+    marquee.style.visibility = next === 'hero' ? 'visible' : 'hidden';
+    if (next !== 'hero') header.classList.remove('is-intro');
+
     if (!next) {
+      header.classList.remove('is-flash');
       if (!cleared) {
         renderer.clear();
         cleared = true;
@@ -257,33 +337,50 @@ export function startScene3d(canvas: HTMLCanvasElement) {
     damped[next] = entering ? raw : damped[next] + (raw - damped[next]) * damp;
     const pose = poses[next](damped[next]);
 
-    // Só a rotação e a dispersão suavizam: a posição acompanha o palco para a peça rolar com a página.
-    const sway = Math.sin(now / 2400) * 0.08;
+    const stage = stages[next].getBoundingClientRect();
+    if (next === 'hero') marquee.style.transform = `translate3d(0, ${stage.top}px, 0)`;
+
+    const calm = 1 - pose.z / (CAMERA_Z - 1.3);
+    const sway = Math.sin(now / 2400) * 0.08 * calm;
     const follow = entering ? 1 : damp;
-    rotY += (pose.rotY + sway + pointerX * 0.4 - rotY) * follow;
-    rotX += (pose.rotX + pointerY * 0.28 + Math.cos(now / 3100) * 0.03 - rotX) * follow;
+    rotY += (pose.rotY + sway + pointerX * 0.4 * calm - rotY) * follow;
+    rotX += (pose.rotX + (pointerY * 0.28 + Math.cos(now / 3100) * 0.03) * calm - rotX) * follow;
     scatter += (pose.scatter - scatter) * follow;
 
-    const rect = stages[next].getBoundingClientRect();
-    pivot.position.x = ((rect.left + pose.x * rect.width) / canvas.clientWidth - 0.5) * viewW;
-    pivot.position.y = -((rect.top + pose.y * rect.height) / canvas.clientHeight - 0.5) * viewH;
-    pivot.rotation.set(rotX, rotY, -0.04);
+    // A posição acompanha o palco sem suavização, para a peça rolar junto com a página.
+    const depth = (CAMERA_Z - pose.z) / CAMERA_Z;
+    pivot.position.x = ((stage.left + pose.x * stage.width) / canvas.clientWidth - 0.5) * viewW * depth;
+    pivot.position.y = -((stage.top + pose.y * stage.height) / canvas.clientHeight - 0.5) * viewH * depth;
+    pivot.position.z = pose.z;
+    pivot.rotation.set(rotX, rotY, -0.04 * calm);
     pivot.scale.setScalar(pose.size / symbolWidth);
 
     pieces.forEach((piece, index) => {
       const { move, spin } = SCATTER[index];
       piece.mesh.position.copy(piece.home).addScaledVector(move, scatter);
       piece.mesh.rotation.set(spin.x * scatter, spin.y * scatter, spin.z * scatter);
-      const lit = pose.highlight === -1 || pose.highlight === index;
-      tint.copy(lit ? LIME : DIM);
+      const lit = pose.highlight < 0 || pose.highlight === index;
+      if (pose.highlight === index) tint.copy(LIME);
+      else tint.copy(lit ? BASE_COLOR[index] : DIM);
+      if (pose.wire) tint.copy(LIME);
       const mix = entering ? 1 : 1 - Math.exp(-dt / 160);
       piece.material.color.lerp(tint, mix);
+      piece.material.wireframe = pose.wire;
       // Apagada, a peça vira preto brilhante e reflete o ambiente em vez de sumir no fundo.
-      piece.material.roughness = lerp(piece.material.roughness, lit ? 0.42 : 0.16, mix);
-      piece.material.clearcoat = lerp(piece.material.clearcoat, lit ? 0.25 : 1, mix);
+      piece.material.roughness = lerp(piece.material.roughness, lit ? 0.3 : 0.16, mix);
+      piece.material.clearcoat = lerp(piece.material.clearcoat, lit ? 0.7 : 1, mix);
       piece.material.envMapIntensity = lerp(piece.material.envMapIntensity, lit ? 1 : 3.2, mix);
     });
 
+    if (next === 'hero') header.classList.toggle('is-intro', pose.flash < 0.6);
+    if (next === 'hero' || next === 'closing') {
+      flashes[next].style.opacity = String(pose.flash);
+      header.classList.toggle('is-flash', pose.flash > 0.5 && stage.top <= 34 && stage.bottom > 34);
+    } else {
+      header.classList.remove('is-flash');
+    }
+
+    canvas.style.visibility = pose.flash >= 1 ? 'hidden' : 'visible';
     renderer.render(scene, camera);
   };
 

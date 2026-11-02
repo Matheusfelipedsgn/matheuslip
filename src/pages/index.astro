@@ -5,6 +5,9 @@ import Differentials from '../components/Differentials.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
+import Manifesto from '../components/Manifesto.astro';
+import Opening from '../components/Opening.astro';
+import PageTransition from '../components/PageTransition.astro';
 import Portfolio from '../components/Portfolio.astro';
 import Process from '../components/Process.astro';
 import Scene3d from '../components/Scene3d.astro';
@@ -17,12 +20,15 @@ import Base from '../layouts/Base.astro';
   <Scene3d />
   <main id="conteudo">
     <Hero />
-    <About />
+    <Opening />
+    <Manifesto />
     <Services />
     <Portfolio />
+    <About />
     <Process />
     <Differentials />
     <Cta />
   </main>
   <Footer />
+  <PageTransition />
 </Base>

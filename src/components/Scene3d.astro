@@ -1,3 +1,14 @@
+---
+import Wordmark from '../assets/logo/volt-wordmark.svg';
+
+const copies = [1, 2, 3, 4, 5, 6];
+---
+
+<div class="marquee" aria-hidden="true" data-marquee>
+  <div class="run">
+    {copies.map(() => <Wordmark class="word" />)}
+  </div>
+</div>
 <canvas class="scene3d" aria-hidden="true" data-scene></canvas>
 
 <script>
@@ -28,5 +39,51 @@
 
   :global(.is-ready) .scene3d {
     display: block;
+  }
+
+  /* O nome corre atrás do objeto: esta camada fica abaixo do canvas e do conteúdo. */
+  .marquee {
+    --word-h: clamp(6rem, 30vh, 19rem);
+    position: fixed;
+    z-index: 0;
+    top: calc(50svh - var(--word-h) / 2);
+    left: 0;
+    display: none;
+    overflow: hidden;
+    width: 100%;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  :global(.has-3d) .marquee {
+    display: block;
+  }
+
+  .run {
+    display: flex;
+    width: max-content;
+    animation: volt-run 42s linear infinite;
+  }
+
+  .run :global(.word) {
+    flex-shrink: 0;
+    width: auto;
+    height: var(--word-h);
+    margin-right: calc(var(--word-h) * 0.4);
+    /* Textura de fundo: quase funde com o preto para não competir com o objeto e o título. */
+    color: #0f0f0f;
+    --logo-accent: currentColor;
+  }
+
+  @keyframes volt-run {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 56.24rem) {
+    .marquee {
+      --word-h: clamp(4.5rem, 15vh, 10rem);
+    }
   }
 </style>

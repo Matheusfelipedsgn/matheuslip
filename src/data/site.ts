@@ -1,8 +1,15 @@
+import ascensao from '../assets/projects/ascensao.jpg';
+import comfortZone from '../assets/projects/comfort-zone.jpg';
+import distribuicaoTurbo from '../assets/projects/distribuicao-turbo.webp';
+import escolaDanca from '../assets/projects/escola-danca.webp';
 import escontol from '../assets/projects/escontol.webp';
 import facilid from '../assets/projects/facilid.png';
 import forbee from '../assets/projects/forbee.png';
+import genesis from '../assets/projects/genesis.jpg';
+import gracinamidia from '../assets/projects/gracinamidia.png';
 import hmaisBrasil from '../assets/projects/hmais-brasil.webp';
-import imersaoTurbo from '../assets/projects/imersao-turbo.webp';
+import mateusBelini from '../assets/projects/mateus-belini.webp';
+import paloma from '../assets/projects/paloma.png';
 import paperNova from '../assets/projects/paper-nova.webp';
 import rapEngenharia from '../assets/projects/rap-engenharia.webp';
 import soTemBraba from '../assets/projects/so-tem-braba.webp';
@@ -55,6 +62,26 @@ export const services = [
     ],
   },
   {
+    name: 'Interfaces e Produtos Digitais',
+    description:
+      'Projetos de interface que priorizam clareza, usabilidade, organização e consistência visual.',
+    benefits: [
+      'Fluxos fáceis de entender',
+      'Telas organizadas e consistentes',
+      'Decisões pensadas para quem usa',
+    ],
+  },
+  {
+    name: 'Direção Visual e Estratégia',
+    description:
+      'Conceitos e sistemas visuais alinhados ao posicionamento e aos objetivos de cada projeto.',
+    benefits: [
+      'Uma linguagem própria para a marca',
+      'Coerência entre as peças',
+      'Estética com função definida',
+    ],
+  },
+  {
     name: 'Manutenção e Evolução',
     description:
       'Atualizações, ajustes, melhorias e suporte contínuo para manter o site funcionando e atualizado.',
@@ -82,11 +109,39 @@ export const projects: {
     url: 'https://www.behance.net/gallery/197727429/Landign-Page-Forbee',
   },
   {
+    name: 'Gracinamidia',
+    category: 'Social media',
+    image: gracinamidia,
+    alt: 'Capa do projeto de social media da Gracinamidia, com retrato de Gracielly sobre fundo verde',
+    url: 'https://www.behance.net/gallery/213612411/SOCIAL-MEDIA-Gracinamidia',
+  },
+  {
     name: 'Facilid',
     category: 'Landing page',
     image: facilid,
     alt: 'Landing page da Facilid sobre certificação digital, com formulário sobre fundo azul',
     url: 'https://www.behance.net/gallery/197727765/Lading-Page-Facilid',
+  },
+  {
+    name: 'Escola de Dança',
+    category: 'Social media',
+    image: escolaDanca,
+    alt: 'Arte em tons de laranja com um homem sorrindo e usando chapéu de couro',
+    url: 'https://www.behance.net/gallery/220822071/SOCIAL-MEDIA-Escola-de-Danca',
+  },
+  {
+    name: 'Turbo Academy',
+    category: 'Landing page',
+    image: distribuicaoTurbo,
+    alt: 'Celulares sobre fundo verde-escuro mostrando a página da Distribuição Turbo',
+    url: 'https://www.behance.net/gallery/221802989/LP-Distribuicao-Turbo-(Turbo-Academy)',
+  },
+  {
+    name: 'Dra. Paloma Nascimento',
+    category: 'Social media',
+    image: paloma,
+    alt: 'Capa do projeto de social media da Dra. Paloma Nascimento, sentada de terno branco',
+    url: 'https://www.behance.net/gallery/220777365/SOCIAL-MEDIA-DraPaloma-Nascimento',
   },
   {
     name: 'Yolo Catering',
@@ -96,18 +151,32 @@ export const projects: {
     url: 'https://www.behance.net/gallery/152694565/Landing-Page-Yolo-Catering-Criativo',
   },
   {
-    name: 'Turbo Academy',
-    category: 'Landing page',
-    image: imersaoTurbo,
-    alt: 'Landing page da Imersão Turbo, com tópicos numerados e um palestrante de camiseta preta',
-    url: 'https://www.behance.net/gallery/221803101/LP-Imersao-Turbo-(Turbo-Academy)',
-  },
-  {
     name: 'Só Tem Braba',
     category: 'E-commerce',
     image: soTemBraba,
     alt: 'Banner da Só Tem Braba com a frase Seja única e um tênis dourado sobre fundo escuro',
     url: 'https://www.behance.net/gallery/197727183/E-commerce-So-Tem-Braba',
+  },
+  {
+    name: 'Ascensão Store',
+    category: 'Identidade visual',
+    image: ascensao,
+    alt: 'Sacolas de papel com padrão da marca Ascensão Store sobre fundo bege',
+    url: 'https://www.behance.net/gallery/125286103/Identidade-Visual-Ascensao-Store',
+  },
+  {
+    name: 'Escontol',
+    category: 'Identidade visual',
+    image: escontol,
+    alt: 'Peças em azul e branco da Escontol dispostas em diagonal',
+    url: 'https://www.behance.net/gallery/161535881/Identidade-Visual-Escontol',
+  },
+  {
+    name: 'Mateus e Belini',
+    category: 'Motion',
+    image: mateusBelini,
+    alt: 'Dupla sertaneja cantando em um palco com luzes azuis',
+    url: 'https://www.behance.net/gallery/221443223/Motion-Mateus-e-Belini',
   },
   {
     name: 'Paper Nova',
@@ -124,11 +193,18 @@ export const projects: {
     url: 'https://www.behance.net/gallery/203718703/Identidade-Visual-Rap-Engenharia',
   },
   {
-    name: 'Escontol',
+    name: 'Genesis Research',
     category: 'Identidade visual',
-    image: escontol,
-    alt: 'Peças em azul e branco da Escontol dispostas em diagonal',
-    url: 'https://www.behance.net/gallery/161535881/Identidade-Visual-Escontol',
+    image: genesis,
+    alt: 'Notebook e celular com a marca Genesis Research sobre fundo roxo',
+    url: 'https://www.behance.net/gallery/137005881/Identidade-Genesis-Research',
+  },
+  {
+    name: 'Comfort Zone',
+    category: 'Identidade visual',
+    image: comfortZone,
+    alt: 'Mulher em roupa esportiva preta com a marca Comfort Zone sobre fundo escuro',
+    url: 'https://www.behance.net/gallery/123605797/Identidade-Visual-Comfort-Zone',
   },
   {
     name: 'Hmais Brasil',

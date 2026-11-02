@@ -19,7 +19,8 @@
   /* Margem lateral dos blocos de tela cheia, alinhada ao .wrap em telas muito largas. */
   --edge: calc(max(0px, (100vw - 100rem) / 2) + var(--gutter));
   --section: clamp(6rem, 10vw, 9rem);
-  --header-h: 4rem;
+  /* Altura ocupada pela barra flutuante, com a margem superior incluída. */
+  --header-h: 4.25rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Inclinação da diagonal do símbolo da Volt (cerca de 56°): largura = altura x 0,675. */
@@ -122,6 +123,11 @@ footer {
   background: var(--ink);
 }
 
+/* Fundo transparente de propósito: o objeto 3D fica atrás destas seções. */
+.on-black {
+  color: var(--paper);
+}
+
 .skip-link {
   position: absolute;
   z-index: 100;
@@ -200,6 +206,71 @@ footer {
   from {
     opacity: 0;
     transform: translateY(1.25rem);
+  }
+}
+
+/* Transições entre seções, ligadas à rolagem. Sem suporte, as seções apenas se sucedem. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* A seção clara sobe com a borda na diagonal da marca e termina reta. */
+    .t-in {
+      animation: section-in linear both;
+      animation-range: entry 0px entry 80vh;
+      animation-timeline: view();
+    }
+
+    /* A seção recua e arredonda ao sair, como uma tela que dá lugar à próxima. */
+    .t-out {
+      transform-origin: 50% 100%;
+      animation: section-out linear both;
+      animation-range: exit 0px exit 90vh;
+      animation-timeline: view();
+    }
+
+    .t-in.t-out {
+      animation:
+        section-in linear both,
+        section-out linear both;
+      animation-range:
+        entry 0px entry 80vh,
+        exit 0px exit 90vh;
+      animation-timeline: view(), view();
+    }
+
+    /* O lime sai cortado pela diagonal, revelando o preto da seção seguinte. */
+    .t-slant-out {
+      animation: slant-out linear both;
+      animation-range: exit 0px exit 100vh;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes section-in {
+  from {
+    clip-path: polygon(0 34vh, 100% 0, 100% 100%, 0 100%);
+  }
+
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes section-out {
+  to {
+    border-radius: 2.5rem;
+    filter: brightness(0.55);
+    transform: scale(0.9);
+  }
+}
+
+@keyframes slant-out {
+  from {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 100vh), 0 calc(100% - 30vh));
   }
 }
 

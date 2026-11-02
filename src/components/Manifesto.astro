@@ -1,0 +1,86 @@
+---
+const text =
+  'Design vai além da estética. Cada elemento precisa cumprir uma função, e cada página existe para levar alguém ao próximo passo.';
+const words = text.split(' ');
+---
+
+<section class="manifesto t-slant-out" aria-label="Como pensamos design" data-light data-manifesto>
+  <div class="stage">
+    <p class="text">
+      {words.map((word) => <span class="word" data-word>{word} </span>)}
+    </p>
+  </div>
+</section>
+
+<script>
+  const root = document.documentElement;
+  const section = document.querySelector<HTMLElement>('[data-manifesto]')!;
+  const words = [...section.querySelectorAll<HTMLElement>('[data-word]')];
+
+  if (root.classList.contains('has-3d')) {
+    let queued = false;
+    const paint = () => {
+      queued = false;
+      const rect = section.getBoundingClientRect();
+      const range = rect.height - innerHeight;
+      if (rect.bottom < 0 || rect.top > innerHeight) return;
+      const lit = Math.max(0, Math.min(1, -rect.top / (range * 0.85))) * words.length;
+      words.forEach((word, index) => word.classList.toggle('is-lit', index < lit));
+    };
+    addEventListener(
+      'scroll',
+      () => {
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(paint);
+        }
+      },
+      { passive: true },
+    );
+    paint();
+  }
+</script>
+
+<style>
+  .manifesto {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  :global(.has-3d) .manifesto {
+    height: 240svh;
+  }
+
+  .stage {
+    display: grid;
+    align-content: center;
+    min-height: 70svh;
+    padding: var(--section) var(--edge);
+  }
+
+  :global(.has-3d) .stage {
+    position: sticky;
+    top: 0;
+    min-height: 0;
+    height: 100svh;
+    padding-block: var(--header-h) 2rem;
+  }
+
+  .text {
+    max-width: 22ch;
+    font-size: clamp(2.125rem, 7vw, 7.5rem);
+    font-stretch: 118%;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+
+  :global(.has-3d) .word {
+    opacity: 0.45;
+    transition: opacity 0.25s linear;
+  }
+
+  :global(.has-3d) .word:global(.is-lit) {
+    opacity: 1;
+  }
+</style>

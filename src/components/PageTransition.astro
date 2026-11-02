@@ -1,0 +1,82 @@
+---
+import Symbol from '../assets/logo/volt-symbol.svg';
+---
+
+<div class="curtain" aria-hidden="true" data-curtain>
+  <Symbol class="mark" />
+</div>
+
+<script>
+  const curtain = document.querySelector<HTMLElement>('[data-curtain]')!;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const COVER = 420;
+  const REVEAL = 520;
+  let busy = false;
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+
+  // Links internos: a cortina cobre a tela, a página salta sem rolar por tudo e a cortina sai.
+  document.addEventListener('click', async (event) => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
+    const hash = link?.getAttribute('href');
+    if (!link || !hash || hash === '#' || reduced || busy || event.ctrlKey || event.metaKey) return;
+    const target = document.querySelector<HTMLElement>(hash);
+    if (!target) return;
+
+    event.preventDefault();
+    busy = true;
+    curtain.classList.add('is-in');
+    await wait(COVER);
+
+    window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior: 'instant' });
+    history.pushState(null, '', hash);
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+    await nextFrame();
+    await nextFrame();
+
+    curtain.classList.add('is-out');
+    await wait(REVEAL);
+    curtain.classList.add('is-reset');
+    curtain.classList.remove('is-in', 'is-out');
+    await nextFrame();
+    curtain.classList.remove('is-reset');
+    busy = false;
+  });
+</script>
+
+<style>
+  .curtain {
+    position: fixed;
+    z-index: 40;
+    display: grid;
+    background: var(--accent);
+    clip-path: polygon(0 125%, 100% 105%, 100% 125%, 0 145%);
+    inset: 0;
+    place-items: center;
+    pointer-events: none;
+    transition: clip-path 0.42s cubic-bezier(0.7, 0, 0.2, 1);
+    visibility: hidden;
+  }
+
+  .curtain:global(.is-in) {
+    clip-path: polygon(0 -5%, 100% -25%, 100% 125%, 0 145%);
+    visibility: visible;
+  }
+
+  .curtain:global(.is-out) {
+    clip-path: polygon(0 -45%, 100% -65%, 100% -25%, 0 -5%);
+    transition-duration: 0.52s;
+  }
+
+  .curtain:global(.is-reset) {
+    transition: none;
+  }
+
+  .mark {
+    width: clamp(5rem, 14vw, 11rem);
+    height: auto;
+    color: var(--ink);
+  }
+</style>

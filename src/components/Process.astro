@@ -2,9 +2,9 @@
 import { steps } from '../data/site';
 ---
 
-<section id="processo" class="process" aria-labelledby="processo-title" data-track="process">
+<section id="processo" class="process on-black" aria-labelledby="processo-title" data-track="process">
   <div class="stage" data-stage>
-    <div class="column">
+    <div class="column" data-column>
       <h2 id="processo-title">Como funciona um projeto</h2>
 
       <ol class="steps">
@@ -65,33 +65,42 @@ import { steps } from '../data/site';
     color: var(--muted-on-ink);
   }
 
-  /* Com 3D: a cada etapa, as peças soltas chegam mais perto de formar o símbolo. */
+  /* Com 3D: o objeto se monta no centro e as etapas acompanham em quatro colunas na base. */
   :global(.has-3d) .process {
-    height: 300svh;
+    height: 320svh;
   }
 
   :global(.has-3d) .stage {
     position: sticky;
     top: 0;
-    display: flex;
     overflow: clip;
-    flex-direction: column;
-    justify-content: center;
     height: 100svh;
     min-height: 38rem;
-    padding-block: calc(var(--header-h) + 1rem) 1.5rem;
+    padding: 0;
   }
 
   :global(.has-3d) .column {
-    width: 50%;
-    margin-left: auto;
+    position: absolute;
+    right: 0;
+    bottom: clamp(1.5rem, 4vh, 3rem);
+    left: 0;
+    padding-inline: var(--edge);
   }
 
   :global(.has-3d) h2 {
-    font-size: clamp(1.75rem, 3.4vw, 3.5rem);
+    font-size: clamp(1.75rem, 3vw, 3.25rem);
+  }
+
+  :global(.has-3d) .steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 2rem);
+    margin-top: 1.5rem;
   }
 
   :global(.has-3d) .step {
+    display: block;
+    padding-block: 1rem 0;
     transition: border-color 0.3s linear;
   }
 
@@ -100,6 +109,11 @@ import { steps } from '../data/site';
   :global(.has-3d) p {
     color: var(--dim-on-ink);
     transition: color 0.3s linear;
+  }
+
+  :global(.has-3d) .number {
+    display: block;
+    margin-bottom: 0.5rem;
   }
 
   :global(.has-3d) .is-active {
@@ -119,13 +133,9 @@ import { steps } from '../data/site';
   }
 
   @media (max-width: 56.24rem) {
-    :global(.has-3d) .stage {
-      justify-content: flex-end;
-      padding-inline: var(--gutter);
-    }
-
     :global(.has-3d) .column {
-      width: auto;
+      bottom: 1rem;
+      padding-inline: var(--gutter);
     }
 
     :global(.has-3d) h2 {
@@ -133,15 +143,18 @@ import { steps } from '../data/site';
     }
 
     :global(.has-3d) .steps {
+      display: block;
       margin-top: 0.75rem;
     }
 
     :global(.has-3d) .step {
+      display: grid;
       grid-template-columns: 2.25rem minmax(0, 1fr);
       padding-block: 0.5rem;
     }
 
     :global(.has-3d) .number {
+      margin: 0;
       font-size: 1.625rem;
     }
 

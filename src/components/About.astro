@@ -1,90 +1,218 @@
 ---
 import { Image } from 'astro:assets';
-import photo from '../assets/photos/about.webp';
+import main from '../assets/photos/about.webp';
+import evento from '../assets/photos/life-evento.webp';
+import mercado from '../assets/photos/life-mercado.webp';
+import mural from '../assets/photos/life-mural.webp';
+import perfil from '../assets/photos/life-perfil.webp';
+import sunset from '../assets/photos/life-sunset.webp';
+
+const life = [
+  { src: mural, alt: 'Matheus Felipe sorrindo em um restaurante, com um mural colorido ao fundo' },
+  { src: mercado, alt: 'Matheus Felipe de camiseta verde, olhando para o lado em um mercado movimentado' },
+  { src: sunset, alt: 'Matheus Felipe ao pôr do sol, em um mirante com a cidade ao fundo' },
+  { src: evento, alt: 'Matheus Felipe sorrindo em um evento, de jaqueta verde e crachá' },
+  { src: perfil, alt: 'Matheus Felipe de perfil, em preto e branco, segurando um notebook' },
+];
 ---
 
-<section id="sobre" class="about" aria-labelledby="sobre-title">
-  <div class="wrap grid">
-    <figure class="figure wipe">
-      <Image
-        src={photo}
-        alt="Matheus Felipe de camiseta preta em seu espaço de trabalho, com luz verde lime ao fundo"
-        widths={[420, 640, 900, 1254]}
-        sizes="(min-width: 56.25rem) 36vw, 100vw"
-      />
-    </figure>
+<section id="sobre" class="about on-paper t-in t-out" aria-labelledby="sobre-title" data-light>
+  <div class="wrap">
+    <h2 id="sobre-title" class="question reveal">Quem está por trás da Volt?</h2>
 
-    <div class="text">
-      <h2 id="sobre-title" class="reveal">Sou Matheus Felipe, criador da Volt.</h2>
-      <div class="body reveal">
-        <p>
-          Comecei no design ainda na adolescência, em Belo Horizonte. São mais de 8 anos criando
-          identidades visuais, peças para redes sociais, interfaces e landing pages, em segmentos
-          como estética, gastronomia e infoprodutos.
+    <div class="story">
+      <figure class="portrait wipe">
+        <Image
+          src={main}
+          alt="Matheus Felipe de camiseta preta em seu espaço de trabalho, com luz verde lime ao fundo"
+          widths={[420, 640, 900, 1254]}
+          sizes="(min-width: 56.25rem) 46vw, 100vw"
+        />
+      </figure>
+
+      <div class="blocks">
+        <p class="hello reveal">
+          Oi, sou o Matheus Felipe. Comecei no design aos 14 anos, movido pela curiosidade de
+          transformar ideias em imagens.
         </p>
-        <p>
-          Passei por escritório de design e por times de marketing, como V4 Company, Turbo Academy e
-          Be Growth. Criei a Volt para levar essa experiência às empresas: acredito que um site
-          precisa ser mais do que bonito, precisa comunicar valor e facilitar o próximo passo de
-          quem visita.
+        <p class="reveal">
+          Passei por identidade visual, comunicação e direção visual, e aprendi que cada marca
+          precisa de uma linguagem própria.
+        </p>
+        <p class="reveal">
+          Trabalhando com performance, entendi que uma peça não se mede só pela estética: ela
+          precisa comunicar e levar alguém a agir.
+        </p>
+        <p class="reveal">
+          A Volt nasce dessa soma. Crio sites e experiências digitais que unem estética, estratégia
+          e tecnologia.
         </p>
       </div>
     </div>
+
+    <ul class="life" aria-label="Fotos de Matheus Felipe fora do trabalho">
+      {
+        life.map((photo) => (
+          <li class="snap">
+            <Image src={photo.src} alt={photo.alt} widths={[320, 520, 730]} sizes="(min-width: 56.25rem) 22vw, 62vw" />
+          </li>
+        ))
+      }
+    </ul>
+
+    <blockquote class="signature reveal">
+      Design bom não é só o que se vê. É o que funciona.
+    </blockquote>
   </div>
 </section>
 
 <style>
-  /* A altura mínima garante que o objeto 3D saia da tela antes de reaparecer em Serviços. */
   .about {
-    display: grid;
-    align-content: center;
-    min-height: 100svh;
     padding-block: var(--section);
+    overflow: clip;
   }
 
-  .grid {
+  .question {
+    max-width: 12ch;
+    font-size: clamp(2.5rem, 9vw, 10rem);
+    letter-spacing: -0.025em;
+    line-height: 0.98;
+  }
+
+  .story {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    align-items: end;
+    align-items: start;
     column-gap: clamp(1rem, 2vw, 2rem);
-    width: 100%;
+    margin-top: clamp(2.5rem, 6vw, 6rem);
   }
 
-  .figure {
-    grid-column: 1 / span 5;
+  .portrait {
+    grid-column: 1 / span 6;
   }
 
-  .figure :global(img) {
+  .portrait :global(img) {
     width: 100%;
     border-radius: var(--radius);
   }
 
-  .text {
-    grid-column: 7 / -1;
+  .blocks {
+    display: grid;
+    grid-column: 8 / -1;
+    gap: clamp(1.5rem, 3vw, 2.75rem);
+    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+    line-height: 1.5;
   }
 
-  .body {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem clamp(1.5rem, 3vw, 3rem);
-    margin-top: clamp(2rem, 5vw, 4.5rem);
-    color: var(--muted-on-ink);
+  .hello {
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    font-stretch: 112%;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  /* Fotos soltas, como se estivessem sobre a mesa: é o lado fora do trabalho. */
+  .life {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: clamp(3rem, 7vw, 7rem);
+    perspective: 1400px;
+  }
+
+  .snap {
+    position: relative;
+    flex-shrink: 0;
+    width: clamp(10rem, 22vw, 21rem);
+    margin-inline: -1.6%;
+    padding: clamp(0.375rem, 0.6vw, 0.625rem);
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.18);
+    transition: transform 0.45s var(--ease-out);
+  }
+
+  .snap:nth-child(1) {
+    transform: rotateY(12deg) rotate(-7deg) translateY(1rem);
+  }
+
+  .snap:nth-child(2) {
+    z-index: 1;
+    transform: rotate(3deg) translateY(-0.5rem);
+  }
+
+  .snap:nth-child(3) {
+    z-index: 2;
+    transform: rotate(-2deg) translateY(1.5rem);
+  }
+
+  .snap:nth-child(4) {
+    z-index: 1;
+    transform: rotate(4deg) translateY(-0.75rem);
+  }
+
+  .snap:nth-child(5) {
+    transform: rotateY(-12deg) rotate(7deg) translateY(1rem);
+  }
+
+  .snap :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 0.5rem;
+    object-fit: cover;
+    object-position: 50% 80%;
+  }
+
+  @media (hover: hover) {
+    .snap:nth-child(n):hover {
+      z-index: 3;
+      transform: translateY(-0.75rem) rotate(0deg);
+    }
+  }
+
+  .signature {
+    max-width: 18ch;
+    margin: clamp(4rem, 9vw, 9rem) 0 0 auto;
+    font-size: clamp(2rem, 5.6vw, 6rem);
+    font-stretch: 118%;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+    text-align: right;
   }
 
   @media (max-width: 56.24rem) {
-    .figure {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      margin-top: 2.5rem;
-    }
-
-    .text {
+    .portrait,
+    .blocks {
       grid-column: 1 / -1;
     }
 
-    .body {
-      grid-template-columns: minmax(0, 1fr);
-      margin-top: 1.5rem;
+    .blocks {
+      margin-top: 2rem;
+    }
+
+    /* No celular as fotos viram uma faixa para arrastar com o dedo. */
+    .life {
+      justify-content: flex-start;
+      overflow-x: auto;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 1.5rem var(--gutter) 3rem;
+      scrollbar-width: none;
+    }
+
+    .life::-webkit-scrollbar {
+      display: none;
+    }
+
+    .snap {
+      width: 60vw;
+      margin-inline: 0 0.75rem;
+    }
+
+    .signature {
+      text-align: left;
+      margin-left: 0;
     }
   }
 </style>
