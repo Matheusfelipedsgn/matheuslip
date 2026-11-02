@@ -1,6 +1,6 @@
 ---
 import Wordmark from '../assets/logo/volt-wordmark.svg';
-import { contact, emailUrl, instagramUrl, nav, whatsappUrl } from '../data/site';
+import { contact, emailUrl, gmailUrl, instagramUrl, nav, whatsappUrl } from '../data/site';
 
 const year = new Date().getFullYear();
 ---
@@ -23,7 +23,7 @@ const year = new Date().getFullYear();
       <li><a href={instagramUrl} target="_blank" rel="noopener">Instagram</a></li>
       {whatsappUrl && <li><a href={whatsappUrl} target="_blank" rel="noopener">WhatsApp</a></li>}
       <li><a href={contact.behance} target="_blank" rel="noopener">Behance</a></li>
-      <li><a href={emailUrl}>{contact.email}</a></li>
+      <li><a href={emailUrl} data-email data-gmail={gmailUrl}>{contact.email}</a></li>
     </ul>
 
     <p class="copyright">© {year} Volt Estúdio Criativo. Todos os direitos reservados.</p>

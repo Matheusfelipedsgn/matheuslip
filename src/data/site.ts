@@ -31,6 +31,7 @@ export const whatsappUrl = contact.whatsapp
   : null;
 
 export const emailUrl = `mailto:${contact.email}`;
+export const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${contact.email}`;
 export const instagramUrl = `https://www.instagram.com/${contact.instagram}/`;
 
 export const nav = [

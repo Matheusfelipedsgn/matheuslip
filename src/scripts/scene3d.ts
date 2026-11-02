@@ -110,7 +110,6 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   ) as Record<Track, HTMLElement>;
 
   const header = document.querySelector<HTMLElement>('header')!;
-  const marquee = document.querySelector<HTMLElement>('[data-marquee]')!;
   const hint = sections.hero.querySelector<HTMLElement>('[data-hint]')!;
   const heroFirst = sections.hero.querySelector<HTMLElement>('[data-first]')!;
   const heroSecond = sections.hero.querySelector<HTMLElement>('[data-second]')!;
@@ -204,7 +203,6 @@ export function startScene3d(canvas: HTMLCanvasElement) {
   const poses: Record<Track, (p: number) => Pose> = {
     hero(p) {
       hint.style.opacity = String(1 - smoothstep(p, 0.02, 0.1));
-      marquee.style.opacity = String(1 - smoothstep(p, 0.12, 0.32));
       header.classList.toggle('is-intro', p < 0.66);
       // A câmera aproxima do traço verde até o lime tomar a tela.
       const zoom = smoothstep(p, 0.08, 0.58);
@@ -332,7 +330,6 @@ export function startScene3d(canvas: HTMLCanvasElement) {
       }
     }
 
-    marquee.style.visibility = next === 'hero' ? 'visible' : 'hidden';
     if (next !== 'hero') header.classList.remove('is-intro');
 
     if (!next) {
@@ -352,7 +349,6 @@ export function startScene3d(canvas: HTMLCanvasElement) {
     const pose = poses[next](damped[next]);
 
     const stage = stages[next].getBoundingClientRect();
-    if (next === 'hero') marquee.style.transform = `translate3d(0, ${stage.top}px, 0)`;
 
     const calm = clamp(1 - pose.z / (CAMERA_Z - 1.3), 0, 1);
     const sway = Math.sin(now / 2400) * 0.08 * calm;

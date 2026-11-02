@@ -1,5 +1,5 @@
 ---
-import { contact, emailUrl, whatsappUrl } from '../data/site';
+import { contact, emailUrl, gmailUrl, whatsappUrl } from '../data/site';
 ---
 
 <section class="cta" aria-labelledby="contato-title" data-track="closing">
@@ -20,12 +20,23 @@ import { contact, emailUrl, whatsappUrl } from '../data/site';
           >
             Solicitar orçamento
           </a>
-          <a class="text-link" href={emailUrl}>{contact.email}</a>
+          <a class="text-link" href={emailUrl} data-email data-gmail={gmailUrl}>{contact.email}</a>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  // No computador, mailto: não abre nada sem um programa de email configurado. No celular, abre o app.
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll<HTMLAnchorElement>('[data-email]').forEach((link) => {
+      link.href = link.dataset.gmail!;
+      link.target = '_blank';
+      link.rel = 'noopener';
+    });
+  }
+</script>
 
 <style>
   .cta {
