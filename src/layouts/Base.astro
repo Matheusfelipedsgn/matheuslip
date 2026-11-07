@@ -1,12 +1,30 @@
 ---
 import '@fontsource-variable/saira/standard.css';
 import '../styles/global.css';
+import { contact, instagramUrl } from '../data/site';
 
 const title = 'Volt Estúdio Criativo | Sites e landing pages';
 const description =
-  'Criação de landing pages, sites institucionais e manutenção com design estratégico. Conheça os projetos da Volt Estúdio Criativo, criada por Matheus Felipe.';
+  'Criação de landing pages, sites institucionais e manutenção com design estratégico. Conheça os projetos da Volt Estúdio Criativo, de Matheus Felipe.';
+// O card do WhatsApp corta perto de 110 caracteres.
+const shareDescription = 'Landing pages e sites com design estratégico, feitos para gerar contatos. Veja os projetos da Volt.';
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : null;
 const ogImage = Astro.site ? new URL('/og.png', Astro.site).href : null;
+
+// Dados do negócio para o Google. A Volt não atende em endereço aberto ao público, então vai sem endereço.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: 'Volt Estúdio Criativo',
+  description,
+  ...(Astro.site && { url: new URL('/', Astro.site).href, image: ogImage, logo: new URL('/apple-touch-icon.png', Astro.site).href }),
+  email: contact.email,
+  ...(contact.whatsapp && { telephone: `+${contact.whatsapp}` }),
+  founder: { '@type': 'Person', name: 'Matheus Felipe' },
+  areaServed: { '@type': 'Country', name: 'Brasil' },
+  knowsAbout: ['Landing pages', 'Sites institucionais', 'Manutenção de sites', 'Design de interfaces'],
+  sameAs: [instagramUrl, contact.behance],
+};
 ---
 
 <!doctype html>
@@ -18,17 +36,22 @@ const ogImage = Astro.site ? new URL('/og.png', Astro.site).href : null;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:site_name" content="Volt Estúdio Criativo" />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={shareDescription} />
     {canonical && <meta property="og:url" content={canonical} />}
     {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:type" content="image/png" />}
     {ogImage && <meta property="og:image:width" content="1200" />}
     {ogImage && <meta property="og:image:height" content="630" />}
+    {ogImage && <meta property="og:image:alt" content="Logo da Volt em branco sobre fundo preto, com uma faixa diagonal verde lime" />}
     <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <script is:inline>
       // Decide antes da primeira pintura, para o layout fixado por rolagem não pular depois.
       if (
